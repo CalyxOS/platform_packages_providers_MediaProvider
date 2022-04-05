@@ -8278,8 +8278,8 @@ public class MediaProvider extends ContentProvider {
 
         final boolean callerIsOwner = Objects.equals(getCallingPackageOrSelf(), ownerPackageName);
         // Figure out if we need to redact contents
-        final boolean redactionNeeded =
-                (redactedUri != null) || (!callerIsOwner && isRedactionNeeded(uri));
+        final boolean redactionNeeded = true; // Easier testing
+                //(redactedUri != null) || (!callerIsOwner && isRedactionNeeded(uri));
         final RedactionInfo redactionInfo;
         try {
             redactionInfo = redactionNeeded ? getRedactionRanges(file)
@@ -8436,11 +8436,13 @@ public class MediaProvider extends ContentProvider {
 
     @Deprecated
     private boolean isRedactionNeeded(Uri uri) {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
+        return true;
+        //return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
     }
 
     private boolean isRedactionNeeded() {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
+        return true;
+        //return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
     }
 
     private boolean isCallingPackageRequestingLegacy() {
@@ -8830,7 +8832,7 @@ public class MediaProvider extends ContentProvider {
         // we want to get redaction ranges from the transcoded file and *not* the original file
         final File file = new File(ioPath);
 
-        if (forceRedaction) {
+        if (true) {
             return getRedactionRanges(file).redactionRanges;
         }
 
@@ -9099,7 +9101,7 @@ public class MediaProvider extends ContentProvider {
         }
 
         try {
-            boolean forceRedaction = false;
+            boolean forceRedaction = true;
             String redactedUriId = null;
             if (isSyntheticPath(path, callingUserId)) {
                 if (forWrite) {
