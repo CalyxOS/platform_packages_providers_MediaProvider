@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad0c0c23_4770519b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-04-07T00:07:40Z",
+      "side": 1,
+      "message": "Atm I\u0027m not even sure if GPS redaction works, even without any changes.\n\nMight be testing it wrong",
+      "revId": "bbb0dcbb12943e88471f597586c2fa908220ca32",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
