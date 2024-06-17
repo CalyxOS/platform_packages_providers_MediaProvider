@@ -9359,9 +9359,13 @@ public class MediaProvider extends ContentProvider {
     private ParcelFileDescriptor openFileAndEnforcePathPermissionsHelper(Uri uri, int match,
             String mode, CancellationSignal signal, @NonNull Bundle opts)
             throws FileNotFoundException {
+        Log.v(TAG, "openFileAndEnforcePathPermissionsHelper: " + uri + ", " + match + ", "
+                + mode + ", " + signal + ", " + opts);
         int modeBits = ParcelFileDescriptor.parseMode(mode);
         boolean forWrite = (modeBits & ParcelFileDescriptor.MODE_WRITE_ONLY) != 0;
         final Uri redactedUri = opts.getParcelable(QUERY_ARG_REDACTED_URI);
+        Log.v(TAG, "openFileAndEnforcePathPermissionsHelper: forWrite=" + forWrite + ", "
+                + "redactedUri=" + redactedUri);
         if (forWrite) {
             if (redactedUri != null) {
                 throw new UnsupportedOperationException(
@@ -9374,6 +9378,7 @@ public class MediaProvider extends ContentProvider {
 
         int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
         if (mediaCapabilitiesUid != 0 && mediaCapabilitiesUid != mCallingIdentity.get().uid) {
+            Log.v(TAG, "Setting invoker identity to mediaCapabilitiesUid: " + mediaCapabilitiesUid);
             mInvokerIdentity.set(getCachedCallingIdentity(mediaCapabilitiesUid));
         }
         final boolean hasOwnerPackageName = hasOwnerPackageName(uri);
@@ -9416,6 +9421,7 @@ public class MediaProvider extends ContentProvider {
         // Figure out if we need to redact contents
         final boolean redactionNeeded = isRedactionNeededForOpenViaContentResolver(redactedUri,
                 ownerPackageName, file);
+        Log.v(TAG, "openFileAndEnforcePathPermissionsHelper: redactionNeeded=" + redactionNeeded);
         final RedactionInfo redactionInfo;
         try {
             redactionInfo = redactionNeeded ? getRedactionRanges(file)
@@ -9423,6 +9429,7 @@ public class MediaProvider extends ContentProvider {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+        Log.v(TAG, "openFileAndEnforcePathPermissionsHelper: redactionInfo=" + redactionInfo);
 
         // Yell if caller requires original, since we can't give it to them
         // unless they have access granted above
@@ -9536,20 +9543,29 @@ public class MediaProvider extends ContentProvider {
             String ownerPackageName, File file) {
         // Redacted Uris should always redact information
         if (redactedUri != null) {
+            Log.v(TAG, "isRedactionNeededForOpenViaContentResolver: redactedUri != null; "
+                    + "return true");
             return true;
         }
 
         final boolean callerIsOwner = Objects.equals(getCallingPackageOrSelf(), ownerPackageName);
         if (callerIsOwner) {
+            Log.v(TAG, "isRedactionNeededForOpenViaContentResolver: callerIsOwner; return false");
             return false;
         }
 
         // To be consistent with FUSE redaction checks we allow similar access for File Manager
         // and System Gallery apps.
         if (isInvokerManager() || canInvokerSystemGalleryAccessTheFile(file.getPath())) {
+            Log.v(TAG, "isRedactionNeededForOpenViaContentResolver: isInvokerManager()="
+                    + isInvokerManager() + ", canInvokerSystemGalleryAccessTheFile(" +
+                    file.getPath() + ")=" + canInvokerSystemGalleryAccessTheFile(file.getPath())
+                    + "; return false");
             return false;
         }
 
+        Log.v(TAG, "isRedactionNeededForOpenViaContentResolver: isRedactionNeeded()="
+                + isRedactionNeeded() + "; returning that");
         return isRedactionNeeded();
     }
 
@@ -9852,6 +9868,8 @@ public class MediaProvider extends ContentProvider {
     @NonNull
     private long[] getRedactionRangesForFuse(String path, String ioPath, int original_uid, int uid,
             int tid, boolean forceRedaction) throws IOException {
+        Log.v(TAG, "getRedactionRangesForFuse(" + path + ", " + ioPath + ", " + original_uid + ", "
+                + tid + ", " + forceRedaction + ")");
         // |ioPath| might refer to a transcoded file path (which is not indexed in the db)
         // |path| will always refer to a valid _data column
         // We use |ioPath| for the filesystem access because in the case of transcoding,
@@ -9859,7 +9877,9 @@ public class MediaProvider extends ContentProvider {
         final File file = new File(ioPath);
 
         if (forceRedaction) {
-            return getRedactionRanges(file).redactionRanges;
+            final long[] redactionRanges = getRedactionRanges(file).redactionRanges;
+            Log.v(TAG, "getRedactionRangesForFuse: " + Arrays.toString(redactionRanges));
+            return redactionRanges;
         }
 
         // When calculating redaction ranges initiated from MediaProvider, the redaction policy
@@ -9873,8 +9893,12 @@ public class MediaProvider extends ContentProvider {
             if (info != null && info.uid == original_uid) {
                 boolean shouldRedact = info.shouldRedact;
                 if (shouldRedact) {
-                    return getRedactionRanges(file).redactionRanges;
+                    final long[] redactionRanges = getRedactionRanges(file).redactionRanges;
+                    Log.v(TAG, "getRedactionRangesForFuse: "
+                            + Arrays.toString(redactionRanges));
+                    return redactionRanges;
                 } else {
+                    Log.v(TAG, "getRedactionRangesForFuse: !shouldRedact");
                     return new long[0];
                 }
             }
@@ -9885,6 +9909,7 @@ public class MediaProvider extends ContentProvider {
         try {
             if (!isRedactionNeeded()
                     || shouldBypassFuseRestrictions(/* forWrite */ false, path)) {
+                Log.v(TAG, "getRedactionRangesForFuse: leaving early");
                 return new long[0];
             }
 
@@ -9918,6 +9943,7 @@ public class MediaProvider extends ContentProvider {
 
             // Do not redact if the caller is the owner
             if (callerIsOwner) {
+                Log.v(TAG, "getRedactionRangesForFuse: callerIsOwner, not redacting");
                 return new long[0];
             }
 
@@ -9927,16 +9953,22 @@ public class MediaProvider extends ContentProvider {
                     fileUri, mCallingIdentity.get().pid, mCallingIdentity.get().uid,
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION) == PERMISSION_GRANTED;
             if (callerHasWriteUriPermission) {
+                Log.v(TAG, "getRedactionRangesForFuse: callerHasWriteUriPermission, not redacting");
                 return new long[0];
             }
             // Check if the caller has write access to other uri formats for the same file.
             callerHasWriteUriPermission = getOtherUriGrantsForPath(path, mediaType,
                     Long.toString(id), /* forWrite */ true) != null;
             if (callerHasWriteUriPermission) {
+                Log.v(TAG, "getRedactionRangesForFuse: other - "
+                        + "callerHasWriteUriPermission, not redacting");
                 return new long[0];
             }
 
-            return getRedactionRanges(file).redactionRanges;
+            final long[] redactionRanges = getRedactionRanges(file).redactionRanges;
+            Log.v(TAG, "getRedactionRangesForFuse: reached end! "
+                    + Arrays.toString(redactionRanges));
+            return redactionRanges;
         } finally {
             restoreLocalCallingIdentity(token);
         }
@@ -10106,6 +10138,9 @@ public class MediaProvider extends ContentProvider {
     @Keep
     public FileOpenResult onFileOpenForFuse(String path, String ioPath, int uid, int tid,
             int transformsReason, boolean forWrite, boolean redact, boolean logTransformsMetrics) {
+        Log.v(TAG, "onFileOpenForFuse(" + path + ", " + ioPath + ", " + uid + ", " + tid + ", "
+                + transformsReason + ", " + forWrite + ", " + redact + ", " + logTransformsMetrics
+                + ")");
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
 
@@ -10131,6 +10166,8 @@ public class MediaProvider extends ContentProvider {
             String redactedUriId = null;
             if (isSyntheticPath(path, userId)) {
                 if (forWrite) {
+                    Log.v(TAG,
+                            "onFileOpenForFuse: Synthetic URIs are not allowed to update EXIF");
                     // Synthetic URIs are not allowed to update EXIF headers.
                     return new FileOpenResult(OsConstants.EACCES /* status */, originalUid,
                             mediaCapabilitiesUid, new long[0]);
@@ -10146,10 +10183,14 @@ public class MediaProvider extends ContentProvider {
                     // Irrespective of the permissions we want to redact in this case.
                     redact = true;
                     forceRedaction = true;
+                    Log.v(TAG, "onFileOpenForFuse: Forcing redaction for redacted path. "
+                            + "redactedUriId = " + redactedUriId);
                 } else if (isPickerPath(path, userId)) {
+                    Log.v(TAG, "onFileOpenForFuse: isPickerPath");
                     return handlePickerFileOpen(path, originalUid);
                 } else {
                     // we don't support any other transformations under .transforms/synthetic dir
+                    Log.v(TAG, "onFileOpenForFuse: we don't support any other transformations...");
                     return new FileOpenResult(OsConstants.ENOENT /* status */, originalUid,
                             mediaCapabilitiesUid, new long[0]);
                 }
@@ -10162,6 +10203,7 @@ public class MediaProvider extends ContentProvider {
             }
 
             if (shouldBypassFuseRestrictions(forWrite, path)) {
+                Log.v(TAG, "onFileOpenForFuse: shouldBypassFuseRestrictions");
                 isSuccess = true;
                 return new FileOpenResult(0 /* status */, originalUid, mediaCapabilitiesUid,
                         redact ? getRedactionRangesForFuse(path, ioPath, originalUid, uid, tid,
@@ -10170,6 +10212,7 @@ public class MediaProvider extends ContentProvider {
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
             if (isCallingPackageRequestingLegacy()) {
+                Log.v(TAG, "onFileOpenForFuse: isCallingPackageRequestingLegacy");
                 return new FileOpenResult(OsConstants.EACCES /* status */, originalUid,
                         mediaCapabilitiesUid, new long[0]);
             }
@@ -10191,6 +10234,8 @@ public class MediaProvider extends ContentProvider {
             }
             checkIfFileOpenIsPermitted(path, fileAttributes, redactedUriId, forWrite);
             isSuccess = true;
+            Log.v(TAG, "onFileOpenForFuse: returning a result! redact=" + redact + ", "
+                    + "forceRedaction=" + forceRedaction);
             return new FileOpenResult(0 /* status */, originalUid, mediaCapabilitiesUid,
                     redact ? getRedactionRangesForFuse(path, ioPath, originalUid, uid, tid,
                             forceRedaction) : new long[0]);
