@@ -40,6 +40,7 @@ import static com.android.providers.media.util.PermissionUtils.checkPermissionWr
 import static com.android.providers.media.util.PermissionUtils.checkPermissionWriteStorage;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionWriteVideo;
 import static com.android.providers.media.util.PermissionUtils.checkWriteImagesOrVideoAppOps;
+import static com.android.providers.media.util.PermissionUtils.isStrictLocationRedactionOn;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -370,6 +371,10 @@ public class LocalCallingIdentity {
 
     private boolean hasPermissionInternal(int permission) {
         boolean targetSdkIsAtLeastT = getTargetSdkVersion() > Build.VERSION_CODES.S_V2;
+        if (isStrictLocationRedactionOn(context)) {
+            // We lie about target SDK because lower SDK should not be rewarded with access to location.
+            targetSdkIsAtLeastT = true;
+        }
         // While we're here, enforce any broad user-level restrictions
         if ((uid == Process.SHELL_UID) && context.getSystemService(UserManager.class)
                 .hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
