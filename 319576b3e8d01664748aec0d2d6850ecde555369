@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7ecd57ea_f418a2ad",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-17T16:37:08Z",
+      "side": 1,
+      "message": "Regression: With this change, when sharing from Gallery or from Aves Libre to ImagePipe, the exif data that ImagePipe receives is *not* redacted. Prior, the GPS location fields shown in ImagePipe are redacted to `0/1` or a series of that.\n\n(To avoid any confusion, for these tests, this is about what ImagePipe receives and and shows when it\u0027s shared to, not about what it outputs.)",
+      "revId": "319576b3e8d01664748aec0d2d6850ecde555369",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
