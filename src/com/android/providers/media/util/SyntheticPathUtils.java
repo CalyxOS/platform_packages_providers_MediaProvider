@@ -65,10 +65,12 @@ public final class SyntheticPathUtils {
                 .getAbsolutePath();
         final String fileName = extractFileName(path);
 
-        return fileName != null
+        final boolean result = fileName != null
                 && startsWith(path, redactedDir)
                 && startsWith(fileName, REDACTED_URI_ID_PREFIX)
                 && fileName.length() == REDACTED_URI_ID_SIZE;
+        Log.v(TAG, "isRedactedPath(" + path + ", " + userId + "): " + result);
+        return result;
     }
 
     public static boolean isPickerPath(String path, int userId) {
@@ -77,15 +79,19 @@ public final class SyntheticPathUtils {
         final String pickerGetContentDir = buildPrimaryVolumeFile(userId,
                 getPickerRelativePath(PICKER_GET_CONTENT_SEGMENT)).getAbsolutePath();
 
-        return path != null && (startsWith(path, pickerDir) || startsWith(path,
+        final boolean result = path != null && (startsWith(path, pickerDir) || startsWith(path,
                 pickerGetContentDir));
+        Log.v(TAG, "isPickerPath(" + path + ", " + userId + "): " + result);
+        return result;
     }
 
     public static boolean isSyntheticPath(String path, int userId) {
         final String syntheticDir = buildPrimaryVolumeFile(userId, getSyntheticRelativePath())
                 .getAbsolutePath();
 
-        return path != null && startsWith(path, syntheticDir);
+        final boolean result = path != null && startsWith(path, syntheticDir);
+        Log.v(TAG, "isSyntheticPath(" + path + ", " + userId + "): " + result);
+        return result;
     }
 
     public static List<String> extractSyntheticRelativePathSegements(String path, int userId) {
