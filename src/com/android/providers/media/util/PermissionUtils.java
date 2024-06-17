@@ -42,6 +42,8 @@ import static android.app.AppOpsManager.OPSTR_WRITE_MEDIA_IMAGES;
 import static android.app.AppOpsManager.OPSTR_WRITE_MEDIA_VIDEO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import static com.android.providers.media.util.Logging.TAG;
+
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.DownloadManager;
@@ -50,6 +52,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -111,9 +114,13 @@ public class PermissionUtils {
      */
     public static boolean checkPermissionManager(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag) {
-        return checkPermissionForDataDelivery(context, MANAGE_EXTERNAL_STORAGE, pid, uid,
-                packageName, attributionTag,
-                generateAppOpMessage(packageName,sOpDescription.get()));
+        final boolean result =
+                checkPermissionForDataDelivery(context, MANAGE_EXTERNAL_STORAGE, pid, uid,
+                        packageName, attributionTag,
+                        generateAppOpMessage(packageName,sOpDescription.get()));
+        Log.v(TAG, "checkPermissionManager(" + context + ", " + pid + ", " + uid + ", "
+                + packageName + ", " + attributionTag + ")=" + result);
+        return result;
     }
 
     /**
@@ -154,6 +161,8 @@ public class PermissionUtils {
     public static boolean checkPermissionAccessMediaLocation(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
+        Log.v(TAG, "checkPermissionAccessMediaLocation(" + context + ", " + pid + ", " + uid + ", "
+                + packageName + ", " + attributionTag + ", " + isTargetSdkAtLeastT + ")");
         // We lie about target SDK because lower SDK should not be rewarded with access to location.
         final boolean hasAccessMediaLocation = checkPermissionForDataDelivery(
                 context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
@@ -163,10 +172,13 @@ public class PermissionUtils {
         // We want to be as strict as or stricter than this. This means that even if the app can
         // manage media, that's not enough if it is missing ACCESS_MEDIA_LOCATION.
         if (!hasAccessMediaLocation) {
+            Log.v(TAG, "checkPermissionAccessMediaLocation(" + context + ", " + pid + ", " + uid
+                    + ", " + packageName + ", " + attributionTag + ", " + isTargetSdkAtLeastT
+                    + "): !hasAccessMediaLocation, return false");
             return false;
         }
-        return checkPermissionManageMedia(context, pid, uid, packageName, attributionTag)
-                || checkPermissionManager(context, pid, uid, packageName, attributionTag);
+        return checkPermissionManager(context, pid, uid, packageName, attributionTag)
+                || checkPermissionManageMedia(context, pid, uid, packageName, attributionTag);
     }
 
     /**
@@ -211,8 +223,12 @@ public class PermissionUtils {
      */
     public static boolean checkPermissionManageMedia(@NonNull Context context, int pid, int uid,
             @NonNull String packageName, @Nullable String attributionTag) {
-        return checkPermissionForDataDelivery(context, MANAGE_MEDIA, pid, uid, packageName,
-                attributionTag, generateAppOpMessage(packageName, sOpDescription.get()));
+        final boolean result =
+                checkPermissionForDataDelivery(context, MANAGE_MEDIA, pid, uid, packageName,
+                        attributionTag, generateAppOpMessage(packageName, sOpDescription.get()));
+        Log.v(TAG, "checkPermissionManageMedia(" + context + ", " + pid + ", " + uid + ", "
+                + packageName + ", " + attributionTag + ")=" + result);
+        return result;
     }
 
     public static boolean checkIsLegacyStorageGranted(@NonNull Context context, int uid,
@@ -547,6 +563,9 @@ public class PermissionUtils {
     private static boolean checkPermissionForDataDelivery(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable String message) {
+        Log.v(TAG, "checkPermissionForDataDelivery(" + context + ", " + permission + ", " + pid
+                + ", " + uid + ", " + packageName + ", " + attributionTag + ", "
+                + message + ")");
         return checkPermissionCommon(context, permission, pid, uid, packageName, attributionTag,
                 message, true /*forDataDelivery*/);
     }
@@ -554,6 +573,9 @@ public class PermissionUtils {
     private static boolean checkPermissionCommon(@NonNull Context context,
             @NonNull String permission, int pid, int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable String message, boolean forDataDelivery) {
+        Log.v(TAG, "checkPermissionCommon(" + context + ", " + permission + ", " + pid
+                + ", " + uid + ", " + packageName + ", " + attributionTag + ", "
+                + message + ", " + forDataDelivery + ")");
         if (packageName == null) {
             String[] packageNames = context.getPackageManager().getPackagesForUid(uid);
             if (packageNames != null && packageNames.length > 0) {
@@ -562,15 +584,26 @@ public class PermissionUtils {
         }
 
         if (isAppOpPermission(permission)) {
-            return checkAppOpPermission(context, permission, pid, uid, packageName, attributionTag,
-                    message, forDataDelivery);
+            final boolean granted =
+                    checkAppOpPermission(context, permission, pid, uid, packageName, attributionTag,
+                            message, forDataDelivery);
+            Log.v(TAG, "checkAppOpPermission for " + packageName + ": granted=" + granted);
+            return granted;
         }
         if (isRuntimePermission(permission)) {
-            return checkRuntimePermission(context, permission, pid, uid, packageName,
-                    attributionTag, message, forDataDelivery);
+            final boolean granted =
+                    checkRuntimePermission(context, permission, pid, uid, packageName,
+                            attributionTag, message, forDataDelivery);
+            Log.v(TAG, "checkRuntimePermission for " + packageName + ": granted=" + granted);
+            return granted;
         }
 
-        return context.checkPermission(permission, pid, uid) == PERMISSION_GRANTED;
+        final boolean granted =
+                context.checkPermission(permission, pid, uid) == PERMISSION_GRANTED;
+        Log.v(TAG, "checkPermissionCommon(" + context + ", " + permission + ", " + pid
+                + ", " + uid + ", " + packageName + ", " + attributionTag + ", "
+                + message + ", " + forDataDelivery + "): granted=" + granted);
+        return granted;
     }
 
     private static boolean isAppOpPermission(String permission) {

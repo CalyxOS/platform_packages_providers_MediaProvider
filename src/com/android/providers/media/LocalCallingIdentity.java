@@ -569,6 +569,7 @@ public class LocalCallingIdentity {
     /** System internals or callers holding permission have no redaction */
     private boolean isRedactionNeededInternal(boolean isTargetSdkAtLeastT) {
         if (hasPermission(PERMISSION_IS_SELF) || hasPermission(PERMISSION_IS_SHELL)) {
+            Log.v(TAG, "isRedactionNeededInternal: returning false: " + this);
             return false;
         }
 
