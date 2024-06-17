@@ -40,9 +40,9 @@ import java.util.stream.Stream;
 
 public class Logging {
     public static final String TAG = "MediaProvider";
-    public static final boolean LOGW = Log.isLoggable(TAG, Log.WARN);
-    public static final boolean LOGD = Log.isLoggable(TAG, Log.DEBUG);
-    public static final boolean LOGV = Log.isLoggable(TAG, Log.VERBOSE);
+    public static final boolean LOGW = true;
+    public static final boolean LOGD = true;
+    public static final boolean LOGV = true;
 
     public static final boolean IS_DEBUGGABLE =
             SystemProperties.getInt("ro.debuggable", 0) == 1;
