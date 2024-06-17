@@ -154,10 +154,11 @@ public class PermissionUtils {
     public static boolean checkPermissionAccessMediaLocation(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
+        // We lie about target SDK because lower SDK should not be rewarded with access to location.
         return checkPermissionForDataDelivery(context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
                 attributionTag, generateAppOpMessage(packageName, sOpDescription.get()))
                 || checkPermissionAccessMediaCompatGrant(context, pid, uid, packageName,
-                attributionTag, isTargetSdkAtLeastT);
+                attributionTag, /* isTargetSdkAtLeastT */ true);
     }
 
     /**
