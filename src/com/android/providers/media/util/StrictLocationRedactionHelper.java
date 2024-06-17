@@ -16,11 +16,14 @@
 
 package com.android.providers.media.util;
 
+import static com.android.providers.media.util.Logging.TAG;
+
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 
 /** Cache the value of the STRICT_LOCATION_REDACTION setting for quick retrieval */
 public class StrictLocationRedactionHelper {
@@ -64,8 +67,11 @@ public class StrictLocationRedactionHelper {
     }
 
     private boolean fetchCurrentSettingEnabled() {
-        return Settings.Secure.getInt(mContext.getContentResolver(), STRICT_LOCATION_REDACTION,
-                /* def */ DEFAULT_VALUE) != 0;
+        final boolean value =
+                Settings.Secure.getInt(mContext.getContentResolver(), STRICT_LOCATION_REDACTION,
+                /* def */ 1) != 0;
+        Log.v(TAG, "strict_location_redaction==" + value);
+        return value;
     }
 
     private final class SettingObserver extends ContentObserver {
@@ -78,6 +84,7 @@ public class StrictLocationRedactionHelper {
         }
 
         public void onChange(boolean selfChange) {
+            Log.v(TAG, "strict_location_redaction value changed");
             mIsSettingEnabled = fetchCurrentSettingEnabled();
         }
     }
