@@ -9750,9 +9750,15 @@ public class MediaProvider extends ContentProvider {
      * </ul>
      */
     private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath) {
+        return shouldBypassFuseRestrictions(forWrite, filePath, /* allowLegacy */ true);
+    }
+    private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath,
+            boolean allowLegacy) {
         boolean isRequestingLegacyStorage = forWrite ? isCallingPackageLegacyWrite()
                 : isCallingPackageLegacyRead();
-        if (isRequestingLegacyStorage) {
+        final boolean shouldAllowLegacy = StrictLocationRedactionHelper.getInstance(getContext())
+                .isSettingEnabled() ? allowLegacy : true;
+        if (allowLegacy && isRequestingLegacyStorage) {
             return true;
         }
 
@@ -9888,7 +9894,8 @@ public class MediaProvider extends ContentProvider {
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         try {
             if (!isRedactionNeeded()
-                    || shouldBypassFuseRestrictions(/* forWrite */ false, path)) {
+                    || shouldBypassFuseRestrictions(/* forWrite */ false, path,
+                            /* allowLegacy */ false)) {
                 return new long[0];
             }
 

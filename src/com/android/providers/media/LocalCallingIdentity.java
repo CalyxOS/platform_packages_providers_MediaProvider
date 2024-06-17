@@ -68,6 +68,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.modules.utils.build.SdkLevel;
 import com.android.providers.media.util.Logging;
 import com.android.providers.media.util.LongArray;
+import com.android.providers.media.util.StrictLocationRedactionHelper;
 import com.android.providers.media.util.UserCache;
 
 import java.io.PrintWriter;
@@ -370,6 +371,11 @@ public class LocalCallingIdentity {
 
     private boolean hasPermissionInternal(int permission) {
         boolean targetSdkIsAtLeastT = getTargetSdkVersion() > Build.VERSION_CODES.S_V2;
+        if (StrictLocationRedactionHelper.getInstance(context).isSettingEnabled()) {
+            // We lie about target SDK because lower SDK should not be rewarded with access
+            // to location.
+            targetSdkIsAtLeastT = true;
+        }
         // While we're here, enforce any broad user-level restrictions
         if ((uid == Process.SHELL_UID) && context.getSystemService(UserManager.class)
                 .hasUserRestriction(UserManager.DISALLOW_USB_FILE_TRANSFER)) {
