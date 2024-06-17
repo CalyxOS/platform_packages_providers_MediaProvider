@@ -9352,6 +9352,7 @@ public class MediaProvider extends ContentProvider {
             modeBits |= ParcelFileDescriptor.MODE_READ_WRITE;
         }
 
+        int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
         final boolean hasOwnerPackageName = hasOwnerPackageName(uri);
         final String[] projection = new String[] {
                 MediaColumns.DATA,
@@ -9391,7 +9392,7 @@ public class MediaProvider extends ContentProvider {
 
         // Figure out if we need to redact contents
         final boolean redactionNeeded = isRedactionNeededForOpenViaContentResolver(redactedUri,
-                ownerPackageName, file);
+                ownerPackageName, mediaCapabilitiesUid, file);
         final RedactionInfo redactionInfo;
         try {
             redactionInfo = redactionNeeded ? getRedactionRanges(file)
@@ -9439,7 +9440,6 @@ public class MediaProvider extends ContentProvider {
             final int uid = Binder.getCallingUid();
             final int transcodeReason = mTranscodeHelper.shouldTranscode(filePath, uid, opts);
             final boolean shouldTranscode = transcodeReason > 0;
-            int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
             if (!shouldTranscode || mediaCapabilitiesUid < Process.FIRST_APPLICATION_UID) {
                 // Although 0 is a valid UID, it's not a valid app uid.
                 // So, we use it to signify that mediaCapabilitiesUid is not set.
@@ -9510,9 +9510,13 @@ public class MediaProvider extends ContentProvider {
     }
 
     private boolean isRedactionNeededForOpenViaContentResolver(Uri redactedUri,
-            String ownerPackageName, File file) {
+            String ownerPackageName, int mediaCapabilitiesUid, File file) {
         // Redacted Uris should always redact information
         if (redactedUri != null) {
+            return true;
+        }
+
+        if (mediaCapabilitiesUid != 0 && getCallingUidOrSelf() != mediaCapabilitiesUid) {
             return true;
         }
 
