@@ -154,10 +154,16 @@ public class PermissionUtils {
     public static boolean checkPermissionAccessMediaLocation(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
-        return checkPermissionForDataDelivery(context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
-                attributionTag, generateAppOpMessage(packageName, sOpDescription.get()))
-                || checkPermissionAccessMediaCompatGrant(context, pid, uid, packageName,
-                attributionTag, isTargetSdkAtLeastT);
+        final boolean hasAccessMediaLocation =
+                checkPermissionForDataDelivery(context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
+                        attributionTag, generateAppOpMessage(packageName, sOpDescription.get()))
+                        || checkPermissionAccessMediaCompatGrant(context, pid, uid, packageName,
+                        attributionTag, isTargetSdkAtLeastT);
+        if (!hasAccessMediaLocation) {
+            return false;
+        }
+        // TODO: maybe check something else, or maybe just always return false?
+        return false;
     }
 
     /**
@@ -167,6 +173,7 @@ public class PermissionUtils {
     private static boolean checkPermissionAccessMediaCompatGrant(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
+        if (true) return false;
         if (!SdkLevel.isAtLeastU() || !isTargetSdkAtLeastT) {
             return false;
         }
