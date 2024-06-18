@@ -67,6 +67,42 @@
       "message": "What happens if the caller for the picker *is* the picker app itself? When does that even happen, if ever?",
       "revId": "75485b20a7cb798a4872c837160caa2f5e4881ec",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72359376_e03283c6",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 9519,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-18T20:23:22Z",
+      "side": 1,
+      "message": "No longer valid.",
+      "parentUuid": "6876afee_c753ddea",
+      "revId": "75485b20a7cb798a4872c837160caa2f5e4881ec",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1cc0d4c5_42a09c0b",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 9519,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-18T20:23:22Z",
+      "side": 1,
+      "message": "No longer valid.",
+      "parentUuid": "677b319a_a6989b0d",
+      "revId": "75485b20a7cb798a4872c837160caa2f5e4881ec",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

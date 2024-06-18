@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c9d6c1a2_dc8631a6",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 754,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-18T20:23:22Z",
+      "side": 1,
+      "message": "This isn\u0027t accurate now.",
+      "range": {
+        "startLine": 754,
+        "startChar": 25,
+        "endLine": 754,
+        "endChar": 74
+      },
+      "revId": "9e1336a2f542291da7d839578e0a260e1f2c5a9e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7e9843f_b266059e",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 763,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-18T20:23:22Z",
+      "side": 1,
+      "message": "I *think* doing this might be okay, but in practice I\u0027m not sure how often (if ever) this is even cached anyway, so we could err on the side of caution and simply not. We\u0027d want to remove the \"cached\" part from the title, and the synchronization.\n\nBut first, verify whether the uid ever even gets cached here. If it doesn\u0027t, we\u0027re not missing anything by removing that.",
+      "revId": "9e1336a2f542291da7d839578e0a260e1f2c5a9e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
