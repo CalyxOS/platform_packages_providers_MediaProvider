@@ -26,6 +26,7 @@ import static com.android.providers.media.util.PermissionUtils.checkPermissionAc
 import static com.android.providers.media.util.PermissionUtils.checkPermissionAccessOemMetadata;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionDelegator;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionInstallPackages;
+import static com.android.providers.media.util.PermissionUtils.checkPermissionManageMedia;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionManager;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionQueryAllPackages;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadAudio;
@@ -359,6 +360,8 @@ public class LocalCallingIdentity {
     public static final int PERMISSION_ACCESS_OEM_METADATA = 1 << 30;
     public static final int PERMISSION_UPDATE_OEM_METADATA = 1 << 31;
 
+    public static final long PERMISSION_MANAGE_MEDIA = 1 << 32;
+
     /**
      * This map stores the list of appOp permissions checked/resolved for each uid.
      */
@@ -405,10 +408,10 @@ public class LocalCallingIdentity {
         }
     }
 
-    private volatile int hasPermission;
-    private volatile int hasPermissionResolved;
+    private volatile long hasPermission;
+    private volatile long hasPermissionResolved;
 
-    public boolean hasPermission(int permission) {
+    public boolean hasPermission(long permission) {
         return hasPermission(permission, /* forDataDelivery */ true);
     }
 
@@ -416,7 +419,7 @@ public class LocalCallingIdentity {
      * Checks the package for the input permission and if the param
      * forDataDelivery is true then makes a note of it.
      */
-    public boolean hasPermission(int permission, boolean forDataDelivery) {
+    public boolean hasPermission(long permission, boolean forDataDelivery) {
         if ((hasPermissionResolved & permission) == 0) {
             if (hasPermissionInternal(permission, forDataDelivery)) {
                 hasPermission |= permission;
@@ -426,7 +429,7 @@ public class LocalCallingIdentity {
         return (hasPermission & permission) != 0;
     }
 
-    private boolean hasPermissionInternal(int permission, boolean forDataDelivery) {
+    private boolean hasPermissionInternal(long permission, boolean forDataDelivery) {
         boolean targetSdkIsAtLeastT = getTargetSdkVersion() > Build.VERSION_CODES.S_V2;
         // While we're here, enforce any broad user-level restrictions
         if ((uid == Process.SHELL_UID) && context.getSystemService(UserManager.class)
@@ -435,7 +438,17 @@ public class LocalCallingIdentity {
                     "Shell user cannot access files for user " + UserHandle.myUserId());
         }
 
-        switch (permission) {
+        // Use `if` instead of `switch` as a hacky workaround to accommodate a greater number of
+        // permission flags than this design supports, without needing to rewrite all these lines.
+        if (permission == PERMISSION_MANAGE_MEDIA) {
+            return checkPermissionManageMedia(context, pid, uid, getPackageName(),
+                    attributionTag);
+        } else if (permission > Integer.MAX_VALUE || permission < Integer.MIN_VALUE) {
+            // We failed to check each new case...
+            assert(false);
+            return false;
+        }
+        switch ((int)permission) {
             case PERMISSION_IS_SELF:
                 return checkPermissionSelf(context, pid, uid);
             case PERMISSION_IS_SHELL:
