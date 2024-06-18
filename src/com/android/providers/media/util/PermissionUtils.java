@@ -154,10 +154,17 @@ public class PermissionUtils {
     public static boolean checkPermissionAccessMediaLocation(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
-        return checkPermissionForDataDelivery(context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
+        final boolean hasAccessMediaLocation = checkPermissionForDataDelivery(
+                context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
                 attributionTag, generateAppOpMessage(packageName, sOpDescription.get()))
                 || checkPermissionAccessMediaCompatGrant(context, pid, uid, packageName,
                 attributionTag, isTargetSdkAtLeastT);
+        // We want to be as strict as or stricter than this. This means that even if the app can
+        // manage media, that's not enough if it is missing ACCESS_MEDIA_LOCATION.
+        if (!hasAccessMediaLocation) {
+            return false;
+        }
+        return checkPermissionManageMedia(context, pid, uid, packageName, attributionTag);
     }
 
     /**
