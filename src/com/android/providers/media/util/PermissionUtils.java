@@ -41,6 +41,7 @@ import static android.app.AppOpsManager.OPSTR_WRITE_MEDIA_AUDIO;
 import static android.app.AppOpsManager.OPSTR_WRITE_MEDIA_IMAGES;
 import static android.app.AppOpsManager.OPSTR_WRITE_MEDIA_VIDEO;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.provider.Settings.Secure.STRICT_LOCATION_REDACTION;
 
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
@@ -50,6 +51,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -154,10 +157,18 @@ public class PermissionUtils {
     public static boolean checkPermissionAccessMediaLocation(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
-        return checkPermissionForDataDelivery(context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
+        final boolean hasAccessMediaLocation = checkPermissionForDataDelivery(
+                context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
                 attributionTag, generateAppOpMessage(packageName, sOpDescription.get()))
                 || checkPermissionAccessMediaCompatGrant(context, pid, uid, packageName,
                 attributionTag, isTargetSdkAtLeastT);
+        // We want to be as strict as or stricter than this. This means that even if the app can
+        // manage media, that's not enough if it is missing ACCESS_MEDIA_LOCATION.
+        if (!hasAccessMediaLocation) {
+            return false;
+        }
+        return checkPermissionManageMedia(context, pid, uid, packageName, attributionTag)
+                || checkPermissionManager(context, pid, uid, packageName, attributionTag);
     }
 
     /**
@@ -384,6 +395,14 @@ public class PermissionUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} if the strict location redaction feature is enabled (default if unset).
+     */
+    public static boolean isStrictLocationRedactionEnabled(@NonNull Context context) {
+        return Settings.Secure.getInt(getContext().getContentResolver(), STRICT_LOCATION_REDACTION,
+                /* def */ 1) != 0;
     }
 
     @VisibleForTesting
