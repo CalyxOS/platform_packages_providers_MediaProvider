@@ -88,6 +88,7 @@ import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_RED
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_SELF;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_SHELL;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_SYSTEM_GALLERY;
+import static com.android.providers.media.LocalCallingIdentity.PERMISSION_MANAGE_MEDIA;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_READ_IMAGES;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_READ_VIDEO;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_WRITE_EXTERNAL_STORAGE;
@@ -337,6 +338,7 @@ import com.android.providers.media.util.Preconditions;
 import com.android.providers.media.util.RedactionUtils;
 import com.android.providers.media.util.SQLiteQueryBuilder;
 import com.android.providers.media.util.SpecialFormatDetector;
+import com.android.providers.media.util.StrictLocationRedactionHelper;
 import com.android.providers.media.util.StringUtils;
 import com.android.providers.media.util.UserCache;
 
@@ -818,6 +820,20 @@ public class MediaProvider extends ContentProvider {
             });
 
     /**
+     * Receiving identity state on the current thread. Populated on demand,
+     * and invalidated by {@link #onCallingPackageChanged()} when each remote
+     * call is finished. Usages of this variable should typically fall back to
+     * mCallingIdentity when it is not set (null). It is set to the identity of
+     * the media capabilities UID when known, if any, i.e. the application
+     * invoking a media/photo picker or otherwise on the receiving end.
+     */
+    private final ThreadLocal<LocalCallingIdentity> mReceivingIdentity = new ThreadLocal();
+
+    private LocalCallingIdentity getReceivingIdentity(int uid) {
+        return LocalCallingIdentity.fromExternal(getContext(), mUserCache, uid);
+    }
+
+    /**
      * We simply propagate the UID that is being tracked by
      * {@link LocalCallingIdentity}, which means we accurately blame both
      * incoming Binder calls and FUSE calls.
@@ -834,6 +850,7 @@ public class MediaProvider extends ContentProvider {
             // we should reset it, the next time it is retrieved it will be created for the
             // appropriate caller.
             mCallingIdentity.remove();
+            mReceivingIdentity.remove();
             return Binder.setCallingWorkSourceUid(Binder.getCallingUid());
         }
 
@@ -1701,6 +1718,7 @@ public class MediaProvider extends ContentProvider {
     public void onCallingPackageChanged() {
         // Identity of the current thread has changed, so invalidate caches
         mCallingIdentity.remove();
+        mReceivingIdentity.remove();
     }
 
     public LocalCallingIdentity clearLocalCallingIdentity() {
@@ -10204,6 +10222,13 @@ public class MediaProvider extends ContentProvider {
             modeBits |= ParcelFileDescriptor.MODE_READ_WRITE;
         }
 
+        int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
+        if (mediaCapabilitiesUid != 0 && mediaCapabilitiesUid != mCallingIdentity.get().uid) {
+            final LocalCallingIdentity receivingIdentity = mReceivingIdentity.get();
+            if (receivingIdentity == null || mediaCapabilitiesUid != receivingIdentity.uid) {
+                mReceivingIdentity.set(getReceivingIdentity(mediaCapabilitiesUid));
+            }
+        }
         final boolean hasOwnerPackageName = hasOwnerPackageName(uri);
         final String[] projection = new String[] {
                 MediaColumns.DATA,
@@ -10254,9 +10279,15 @@ public class MediaProvider extends ContentProvider {
 
         // Yell if caller requires original, since we can't give it to them
         // unless they have access granted above
+        // Merely warn if strict location redaction is enabled, or apps will crash or fail.
         if (redactionNeeded && MediaStore.getRequireOriginal(uri)) {
-            throw new UnsupportedOperationException(
-                    "Caller must hold ACCESS_MEDIA_LOCATION permission to access original");
+            if (StrictLocationRedactionHelper.getInstance(getContext()).isSettingEnabled()) {
+                Log.w(TAG, "Caller wants access to original media, but it must have "
+                        + "MANAGE_EXTERNAL_STORAGE or MANAGE_MEDIA. Returning redacted anyway.");
+            } else {
+                throw new UnsupportedOperationException(
+                        "Caller must hold ACCESS_MEDIA_LOCATION permission to access original");
+            }
         }
 
         // Kick off metadata update when writing is finished
@@ -10291,7 +10322,6 @@ public class MediaProvider extends ContentProvider {
             final int uid = Binder.getCallingUid();
             final int transcodeReason = mTranscodeHelper.shouldTranscode(filePath, uid, opts);
             final boolean shouldTranscode = transcodeReason > 0;
-            int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
             if (!shouldTranscode || mediaCapabilitiesUid < Process.FIRST_APPLICATION_UID) {
                 // Although 0 is a valid UID, it's not a valid app uid.
                 // So, we use it to signify that mediaCapabilitiesUid is not set.
@@ -10375,8 +10405,20 @@ public class MediaProvider extends ContentProvider {
 
         // To be consistent with FUSE redaction checks we allow similar access for File Manager
         // and System Gallery apps.
-        if (isCallingPackageManager() || canSystemGalleryAccessTheFile(file.getPath())) {
-            return false;
+        final String filePath = file.getPath();
+        if (isCallingPackageManager() || canSystemGalleryAccessTheFile(filePath)) {
+            if (!StrictLocationRedactionHelper.getInstance(getContext()).isSettingEnabled()) {
+                return false;
+            }
+            final LocalCallingIdentity receivingIdentity = mReceivingIdentity.get();
+            if (receivingIdentity == null) {
+                return false;
+            }
+            if (receivingIdentity.hasPermission(PERMISSION_IS_MANAGER)
+                    || receivingIdentity.hasPermission(PERMISSION_MANAGE_MEDIA)
+                    || canSystemGalleryAccessTheFile(receivingIdentity, filePath)) {
+                return false;
+            }
         }
 
         return isRedactionNeeded();
@@ -10428,17 +10470,28 @@ public class MediaProvider extends ContentProvider {
         }
     }
 
+    private boolean callingOrReceivingPackageHasPermission(int permission) {
+        if (mCallingIdentity.get().hasPermission(permission)) {
+            return true;
+        }
+        if (!StrictLocationRedactionHelper.getInstance(getContext()).isSettingEnabled()) {
+            return false;
+        }
+        final LocalCallingIdentity receivingIdentity = mReceivingIdentity.get();
+        return receivingIdentity != null && receivingIdentity.hasPermission(permission);
+    }
+
     @Deprecated
     private boolean isRedactionNeeded(Uri uri) {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
+        return callingOrReceivingPackageHasPermission(PERMISSION_IS_REDACTION_NEEDED);
     }
 
     private boolean isRedactionNeeded() {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
+        return callingOrReceivingPackageHasPermission(PERMISSION_IS_REDACTION_NEEDED);
     }
 
     private boolean isCallingPackageRequestingLegacy() {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_GRANTED);
+        return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_GRANTED); // guard
     }
 
     private boolean shouldBypassDatabase(int uid) {
@@ -10468,6 +10521,18 @@ public class MediaProvider extends ContentProvider {
     private boolean canSystemGalleryAccessTheFile(String filePath) {
 
         if (!isCallingPackageSystemGallery()) {
+            return false;
+        }
+
+        final int mediaType = getFileMediaType(filePath);
+
+        return mediaType ==  FileColumns.MEDIA_TYPE_IMAGE ||
+            mediaType ==  FileColumns.MEDIA_TYPE_VIDEO;
+    }
+
+    private boolean canSystemGalleryAccessTheFile(LocalCallingIdentity identity,
+            String filePath) {
+        if (!isSystemGallery(identity)) {
             return false;
         }
 
@@ -12308,6 +12373,17 @@ public class MediaProvider extends ContentProvider {
         return false;
     }
 
+    /** Unrolled version of isCallingPackageSystemGallery that checks the given identity. */
+    private boolean isSystemGallery(LocalCallingIdentity identity) {
+        if (identity.hasPermission(PERMISSION_IS_SYSTEM_GALLERY)) {
+            if (identity.hasPermission(PERMISSION_IS_LEGACY_GRANTED)) {
+                return identity.hasPermission(PERMISSION_IS_LEGACY_WRITE);
+            }
+            return true;
+        }
+        return false;
+    }
+
     private int getCallingUidOrSelf() {
         return mCallingIdentity.get().uid;
     }
@@ -12368,7 +12444,7 @@ public class MediaProvider extends ContentProvider {
 
     @Deprecated
     private boolean isCallingPackageLegacyWrite() {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_WRITE);
+        return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_WRITE); // guard
     }
 
     @Override
