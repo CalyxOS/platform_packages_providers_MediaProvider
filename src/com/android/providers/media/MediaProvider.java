@@ -749,6 +749,20 @@ public class MediaProvider extends ContentProvider {
             });
 
     /**
+     * Invoker identity state on the current thread. Populated on demand,
+     * and invalidated by {@link #onCallingPackageChanged()} when each remote
+     * call is finished. Usages of this variable should typically fall back to
+     * mCallingIdentity when it is not set (null). It is set to the identity of
+     * the media capabilities UID when known, if any, i.e. the application
+     * invoking a media/photo picker.
+     */
+    private final ThreadLocal<LocalCallingIdentity> mInvokerIdentity = new ThreadLocal();
+
+    private LocalCallingIdentity getInvokerIdentity(int uid) {
+        return LocalCallingIdentity.fromExternal(getContext(), mUserCache, uid);
+    }
+
+    /**
      * We simply propagate the UID that is being tracked by
      * {@link LocalCallingIdentity}, which means we accurately blame both
      * incoming Binder calls and FUSE calls.
@@ -765,6 +779,7 @@ public class MediaProvider extends ContentProvider {
             // we should reset it, the next time it is retrieved it will be created for the
             // appropriate caller.
             mCallingIdentity.remove();
+            mInvokerIdentity.remove();
             return Binder.setCallingWorkSourceUid(Binder.getCallingUid());
         }
 
@@ -1531,6 +1546,7 @@ public class MediaProvider extends ContentProvider {
     public void onCallingPackageChanged() {
         // Identity of the current thread has changed, so invalidate caches
         mCallingIdentity.remove();
+        mInvokerIdentity.remove();
     }
 
     public LocalCallingIdentity clearLocalCallingIdentity() {
@@ -9352,6 +9368,13 @@ public class MediaProvider extends ContentProvider {
             modeBits |= ParcelFileDescriptor.MODE_READ_WRITE;
         }
 
+        int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
+        if (mediaCapabilitiesUid != 0 && mediaCapabilitiesUid != mCallingIdentity.get().uid) {
+            final LocalCallingIdentity invokerIdentity = mInvokerIdentity.get();
+            if (invokerIdentity == null || mediaCapabilitiesUid != invokerIdentity.uid) {
+                mInvokerIdentity.set(getInvokerIdentity(mediaCapabilitiesUid));
+            }
+        }
         final boolean hasOwnerPackageName = hasOwnerPackageName(uri);
         final String[] projection = new String[] {
                 MediaColumns.DATA,
@@ -9439,7 +9462,6 @@ public class MediaProvider extends ContentProvider {
             final int uid = Binder.getCallingUid();
             final int transcodeReason = mTranscodeHelper.shouldTranscode(filePath, uid, opts);
             final boolean shouldTranscode = transcodeReason > 0;
-            int mediaCapabilitiesUid = opts.getInt(MediaStore.EXTRA_MEDIA_CAPABILITIES_UID);
             if (!shouldTranscode || mediaCapabilitiesUid < Process.FIRST_APPLICATION_UID) {
                 // Although 0 is a valid UID, it's not a valid app uid.
                 // So, we use it to signify that mediaCapabilitiesUid is not set.
@@ -9523,7 +9545,7 @@ public class MediaProvider extends ContentProvider {
 
         // To be consistent with FUSE redaction checks we allow similar access for File Manager
         // and System Gallery apps.
-        if (isCallingPackageManager() || canSystemGalleryAccessTheFile(file.getPath())) {
+        if (isInvokerManager() || canInvokerSystemGalleryAccessTheFile(file.getPath())) {
             return false;
         }
 
@@ -9567,17 +9589,29 @@ public class MediaProvider extends ContentProvider {
         }
     }
 
+    private boolean callerOrInvokerHasPermission(int permission) {
+        if (mCallingIdentity.get().hasPermission(permission)) {
+            return true;
+        }
+        final LocalCallingIdentity invokerIdentity = mInvokerIdentity.get();
+        return invokerIdentity != null && invokerIdentity.hasPermission(permission);
+    }
+
     @Deprecated
     private boolean isRedactionNeeded(Uri uri) {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
+        return callerOrInvokerHasPermission(PERMISSION_IS_REDACTION_NEEDED);
     }
 
     private boolean isRedactionNeeded() {
-        return mCallingIdentity.get().hasPermission(PERMISSION_IS_REDACTION_NEEDED);
+        return callerOrInvokerHasPermission(PERMISSION_IS_REDACTION_NEEDED);
     }
 
     private boolean isCallingPackageRequestingLegacy() {
         return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_GRANTED);
+    }
+
+    private boolean isInvokerRequestingLegacy() {
+        return getInvokerOrCallingIdentity().hasPermission(PERMISSION_IS_LEGACY_GRANTED);
     }
 
     private boolean shouldBypassDatabase(int uid) {
@@ -9607,6 +9641,22 @@ public class MediaProvider extends ContentProvider {
     private boolean canSystemGalleryAccessTheFile(String filePath) {
 
         if (!isCallingPackageSystemGallery()) {
+            return false;
+        }
+
+        final int mediaType = getFileMediaType(filePath);
+
+        return mediaType ==  FileColumns.MEDIA_TYPE_IMAGE ||
+            mediaType ==  FileColumns.MEDIA_TYPE_VIDEO;
+    }
+
+    private boolean canInvokerSystemGalleryAccessTheFile(String filePath) {
+        final LocalCallingIdentity invokerIdentity = mInvokerIdentity.get();
+        if (invokerIdentity == null) {
+            return canSystemGalleryAccessTheFile(filePath);
+        }
+
+        if (!isInvokerSystemGallery()) {
             return false;
         }
 
@@ -11542,6 +11592,29 @@ public class MediaProvider extends ContentProvider {
         return false;
     }
 
+    private boolean isInvokerSystemGallery() {
+        final LocalCallingIdentity invokerIdentity = mInvokerIdentity.get();
+        if (invokerIdentity == null) {
+            return isCallingPackageSystemGallery();
+        }
+
+        if (invokerIdentity.hasPermission(PERMISSION_IS_SYSTEM_GALLERY)) {
+            if (isInvokerRequestingLegacy()) {
+                return isInvokerLegacyWrite();
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private LocalCallingIdentity getInvokerOrCallingIdentity() {
+        final LocalCallingIdentity invokerIdentity = mInvokerIdentity.get();
+        if (invokerIdentity == null) {
+            return mCallingIdentity.get();
+        }
+        return invokerIdentity;
+    }
+
     private int getCallingUidOrSelf() {
         return mCallingIdentity.get().uid;
     }
@@ -11578,6 +11651,11 @@ public class MediaProvider extends ContentProvider {
     }
 
     @Deprecated
+    private boolean isInvokerManager() {
+        return getInvokerOrCallingIdentity().hasPermission(PERMISSION_IS_MANAGER);
+    }
+
+    @Deprecated
     private boolean isCallingPackageDelegator() {
         return mCallingIdentity.get().hasPermission(PERMISSION_IS_DELEGATOR);
     }
@@ -11590,6 +11668,11 @@ public class MediaProvider extends ContentProvider {
     @Deprecated
     private boolean isCallingPackageLegacyWrite() {
         return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_WRITE);
+    }
+
+    @Deprecated
+    private boolean isInvokerLegacyWrite() {
+        return getInvokerOrCallingIdentity().hasPermission(PERMISSION_IS_LEGACY_WRITE);
     }
 
     @Override
