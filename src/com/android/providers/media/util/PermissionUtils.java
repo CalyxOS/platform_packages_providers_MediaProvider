@@ -48,9 +48,13 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.util.Log;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
@@ -62,6 +66,24 @@ public class PermissionUtils {
     // Callers must hold both the old and new permissions, so that we can
     // handle obscure cases like when an app targets Q but was installed on
     // a device that was originally running on P before being upgraded to Q.
+
+    // Settings.Secure.STRICT_LOCATION_REDACTION
+    private static final String STRICT_LOCATION_REDACTION = "strict_location_redaction";
+
+    @GuardedBy("sStrictLocationRedactionSettingObserver")
+    private static Boolean sStrictLocationRedaction;
+    @GuardedBy("sStrictLocationRedactionSettingObserver")
+    private static boolean sStrictLocationRedactionSettingObserverRegistered;
+
+    private static ContentObserver sStrictLocationRedactionSettingObserver =
+            new ContentObserver(null) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    synchronized (sStrictLocationRedactionSettingObserver) {
+                        sStrictLocationRedaction = null;
+                    }
+                }
+            };
 
     private static ThreadLocal<String> sOpDescription = new ThreadLocal<>();
 
@@ -154,10 +176,19 @@ public class PermissionUtils {
     public static boolean checkPermissionAccessMediaLocation(@NonNull Context context, int pid,
             int uid, @NonNull String packageName, @Nullable String attributionTag,
             boolean isTargetSdkAtLeastT) {
-        return checkPermissionForDataDelivery(context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
+        final boolean hasAccessMediaLocation = checkPermissionForDataDelivery(
+                context, ACCESS_MEDIA_LOCATION, pid, uid, packageName,
                 attributionTag, generateAppOpMessage(packageName, sOpDescription.get()))
                 || checkPermissionAccessMediaCompatGrant(context, pid, uid, packageName,
                 attributionTag, isTargetSdkAtLeastT);
+        // We want to be as strict as or stricter than this. This means that even if the app can
+        // manage media, that's not enough if it is missing ACCESS_MEDIA_LOCATION.
+        if (!hasAccessMediaLocation) {
+            return false;
+        }
+        return !isStrictLocationRedactionEnabled(context)
+                || checkPermissionManager(context, pid, uid, packageName, attributionTag)
+                || checkPermissionManageMedia(context, pid, uid, packageName, attributionTag);
     }
 
     /**
@@ -384,6 +415,29 @@ public class PermissionUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns {@code true} if the strict location redaction feature is enabled (default if unset).
+     * Assumes that the context represents the long-term MediaProvider instance for a user.
+     */
+    public static boolean isStrictLocationRedactionEnabled(@NonNull Context context) {
+        synchronized (sStrictLocationRedactionSettingObserver) {
+            if (sStrictLocationRedaction != null) {
+                return sStrictLocationRedaction;
+            }
+            if (!sStrictLocationRedactionSettingObserverRegistered) {
+                context.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(STRICT_LOCATION_REDACTION),
+                        /* notifyForDescendants */ false,
+                        sStrictLocationRedactionSettingObserver);
+                sStrictLocationRedactionSettingObserverRegistered = true;
+            }
+            final boolean strictLocationRedaction = Settings.Secure.getInt(
+                    context.getContentResolver(), STRICT_LOCATION_REDACTION, /* def */ 1) != 0;
+            sStrictLocationRedaction = strictLocationRedaction;
+            return strictLocationRedaction;
+        }
     }
 
     @VisibleForTesting
