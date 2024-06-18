@@ -26,6 +26,7 @@ import static com.android.providers.media.util.PermissionUtils.checkPermissionAc
 import static com.android.providers.media.util.PermissionUtils.checkPermissionAccessOemMetadata;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionDelegator;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionInstallPackages;
+import static com.android.providers.media.util.PermissionUtils.checkPermissionManageMedia;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionManager;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionQueryAllPackages;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadAudio;
@@ -509,6 +510,10 @@ public class LocalCallingIdentity {
             default:
                 return false;
         }
+    }
+
+    public boolean hasManageMediaPermission() {
+        return checkPermissionManageMedia(context, pid, uid, getPackageName(), attributionTag);
     }
 
     private boolean isLegacyStorageGranted() {
