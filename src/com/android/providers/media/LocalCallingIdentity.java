@@ -25,6 +25,7 @@ import static com.android.providers.media.util.PermissionUtils.checkPermissionAc
 import static com.android.providers.media.util.PermissionUtils.checkPermissionAccessMtp;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionDelegator;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionInstallPackages;
+import static com.android.providers.media.util.PermissionUtils.checkPermissionManageMedia;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionManager;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionQueryAllPackages;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadAudio;
@@ -352,6 +353,8 @@ public class LocalCallingIdentity {
     public static final int PERMISSION_QUERY_ALL_PACKAGES = 1 << 28;
     public static final int PERMISSION_ACCESS_MEDIA_OWNER_PACKAGE_NAME = 1 << 29;
 
+    public static final int PERMISSION_MANAGE_MEDIA = 1 << 30;
+
     private volatile int hasPermission;
     private volatile int hasPermissionResolved;
 
@@ -436,6 +439,9 @@ public class LocalCallingIdentity {
             case PERMISSION_ACCESS_MEDIA_OWNER_PACKAGE_NAME:
                 return checkPermissionAccessMediaOwnerPackageName(
                         context, pid, uid, getPackageName(), attributionTag);
+            case PERMISSION_MANAGE_MEDIA:
+                return checkPermissionManageMedia(context, pid, uid, getPackageName(),
+                        attributionTag);
             default:
                 return false;
         }
