@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b1bb8bb_f275cccc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-19T09:19:03Z",
+      "side": 1,
+      "message": "`s/Invoker/ReceivingPackage/g`,`s/invoker/receivingPackage/g`\n\nLooks like this change affects more than just the picker. It\u0027s designed to affect anything seen to have `EXTRA_MEDIA_CAPABILITIES_UID` set, so this can be the destination app for a share as well.\n\n\"Invoker\", then, is not the correct terminology. https://developer.android.com/training/sharing/send says \"receiving application\", so let\u0027s go with that.",
+      "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
