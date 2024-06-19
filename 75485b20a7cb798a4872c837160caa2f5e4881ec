@@ -35,6 +35,42 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "453165ed_9c6d63f9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-19T09:23:52Z",
+      "side": 1,
+      "message": "Yes it does. See other comments and the issue referenced in the commit message.",
+      "parentUuid": "2c281e39_0e46ba99",
+      "revId": "75485b20a7cb798a4872c837160caa2f5e4881ec",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "09aad8c0_0c0b9cdd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-19T09:23:52Z",
+      "side": 1,
+      "message": "The \"more thought\" has been taking place in internal discussions and the issue referenced in the commit message.",
+      "parentUuid": "1f43ba65_eef146c6",
+      "revId": "75485b20a7cb798a4872c837160caa2f5e4881ec",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "677b319a_a6989b0d",
