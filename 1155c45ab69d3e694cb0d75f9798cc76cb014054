@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bfc7d25c_0a061400",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:28:14Z",
+      "side": 1,
+      "message": "We want this new behavior to be turned off via a toggle in Settings \u003e Privacy. It will default to on. Need to incorporate this somehow, on a per-user basis, so probably via a new one of the user-specific Settings or LineageSettings.",
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
