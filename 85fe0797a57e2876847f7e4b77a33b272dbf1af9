@@ -69,6 +69,24 @@
       "parentUuid": "2733b521_d4c055ea",
       "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae151cac_c35a65c1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T17:59:49Z",
+      "side": 1,
+      "message": "(For the first, \"override transcoding defaults\" also doesn\u0027t affect this.)",
+      "parentUuid": "7f537521_c9fe8b52",
+      "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
