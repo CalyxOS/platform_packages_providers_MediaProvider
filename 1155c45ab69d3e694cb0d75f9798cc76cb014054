@@ -16,6 +16,29 @@
       "message": "We want this new behavior to be turned off via a toggle in Settings \u003e Privacy. It will default to on. Need to incorporate this somehow, on a per-user basis, so probably via a new one of the user-specific Settings or LineageSettings.",
       "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce22c530_7755d1dc",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 9593,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:44:34Z",
+      "side": 1,
+      "message": "Would be better as `callingOrReceivingPackageHasPermission` to match the terms used elsewhere.",
+      "range": {
+        "startLine": 9593,
+        "startChar": 20,
+        "endLine": 9593,
+        "endChar": 49
+      },
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
