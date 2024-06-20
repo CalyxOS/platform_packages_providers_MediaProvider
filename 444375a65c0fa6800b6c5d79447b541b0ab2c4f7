@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a02ff8ef_b8399cfd",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:10:15Z",
+      "side": 1,
+      "message": "Oh brother. Line too long by one.",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c56cee3a_7b65cfa7",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:10:15Z",
+      "side": 1,
+      "message": "This depends on if/how the \"media management\" permission is involved. If having that doesn\u0027t grant access to media location, then we may need to deal with that here.",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd09adcf_f7162321",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:10:15Z",
+      "side": 1,
+      "message": "I don\u0027t think we need this. This method is only called from the method above it anyway.",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
