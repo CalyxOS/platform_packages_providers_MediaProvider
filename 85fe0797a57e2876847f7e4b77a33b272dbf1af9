@@ -87,6 +87,24 @@
       "parentUuid": "7f537521_c9fe8b52",
       "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f02a19c9_8887cb8b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:07:40Z",
+      "side": 1,
+      "message": "\u003e \u003e If an app requests the original unmodified media, does this change work?\n\n\u003e I\u0027d need to find an app that does this...\n\nAves Libre actually does this, and with PS7, which also blocks metadata access to \"Photos and videos\" apps, until I added a change which turns the exception into a warning, it would get this: `java.lang.UnsupportedOperationException: Caller must hold ACCESS_MEDIA_LOCATION permission to access original`\n\nCurrently, I think it\u0027s fair enough to quietly redact even if the app wants the unmodified media, or we\u0027ll run into these exceptions / crashes and I don\u0027t know a way around that otherwise.",
+      "parentUuid": "ae151cac_c35a65c1",
+      "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
