@@ -52,6 +52,24 @@
       "parentUuid": "deeb570d_c9b456a6",
       "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42f16520_248d7c93",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T23:35:51Z",
+      "side": 1,
+      "message": "This is fixed for LeafPic Revived in PS5 in a way that allows the app to continue to work. (It was showing \"404\" for all media when I simply got rid of the fuse legacy allowance entirely - `// Legacy apps that made is this far don\u0027t have the right storage permission` - so I needed to only get rid of it selectively.)\n\nNext step: Do we still need the target SDK checks?",
+      "parentUuid": "72fb234a_186169a0",
+      "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

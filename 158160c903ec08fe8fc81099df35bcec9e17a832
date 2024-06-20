@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5f9ebd23_43d2f121",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T23:35:51Z",
+      "side": 1,
+      "message": "That\u0027s not the entirety of what this does anymore.",
+      "revId": "158160c903ec08fe8fc81099df35bcec9e17a832",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
