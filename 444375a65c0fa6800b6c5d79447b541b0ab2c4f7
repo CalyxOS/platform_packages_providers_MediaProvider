@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "09c8612d_06c39264",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:12:57Z",
+      "side": 1,
+      "message": "It doesn\u0027t, so yes, we either need to deal with it here or somewhere else, or both.",
+      "parentUuid": "c56cee3a_7b65cfa7",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "dd09adcf_f7162321",
         "filename": "src/com/android/providers/media/util/PermissionUtils.java",
         "patchSetId": 7
