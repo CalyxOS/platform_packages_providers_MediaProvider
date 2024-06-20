@@ -33,6 +33,42 @@
       "message": "Is `EXTRA_MEDIA_CAPABILITIES_UID` ever *not* set when we think it should be? Its stated purpose is for transcoding.\n\nIf transcoding is turned off globally or for an app (if possible), does this change work? If an app requests the original unmodified media, does this change work?",
       "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0ce7b3df_37ab25ef",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T17:58:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b1bb8bb_f275cccc",
+      "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f537521_c9fe8b52",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T17:58:09Z",
+      "side": 1,
+      "message": "\u003e If transcoding is turned off globally or for an app (if possible), does this change work?\n\nSettings \u003e Developer Options \u003e Media transcoding settings \u003e Enabled transcoding \u003e Off + reboot. No behavior change.\n\n\u003e If an app requests the original unmodified media, does this change work?\n\nI\u0027d need to find an app that does this...",
+      "parentUuid": "2733b521_d4c055ea",
+      "revId": "85fe0797a57e2876847f7e4b77a33b272dbf1af9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
