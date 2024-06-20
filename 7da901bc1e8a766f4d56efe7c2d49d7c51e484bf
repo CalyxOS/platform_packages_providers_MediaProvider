@@ -34,6 +34,24 @@
       "parentUuid": "bde1e0cb_e99d5848",
       "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "72fb234a_186169a0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T23:05:26Z",
+      "side": 1,
+      "message": "LeafPic Revived is an older gallery app that, when used as a gallery rather than a receiving app, can see the location metadata despite not having MANAGE_EXTERNAL_STORAGE (All files access) or MANAGE_MEDIA, let alone being aware of these new special permissions.\n\nThis change *does not* fix that.",
+      "parentUuid": "deeb570d_c9b456a6",
+      "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
