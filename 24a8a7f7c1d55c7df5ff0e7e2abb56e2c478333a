@@ -16,6 +16,24 @@
       "message": "This is marked as not working because it isn\u0027t working with Phone Saver, but it has Photos and Videos access, so it has ACCESS_MEDIA_LOCATION, and I think that\u0027s affecting this. So, I may still need a different test case for this.",
       "revId": "24a8a7f7c1d55c7df5ff0e7e2abb56e2c478333a",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f99eecb_ebd2ac8b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T22:59:36Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "13617a57_a6254fa8",
+      "revId": "24a8a7f7c1d55c7df5ff0e7e2abb56e2c478333a",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

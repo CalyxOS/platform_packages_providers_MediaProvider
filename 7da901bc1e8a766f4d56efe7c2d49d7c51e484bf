@@ -16,6 +16,24 @@
       "message": "Figure out if this change is needed at all. It wasn\u0027t working with Phone Saver, but that was fixed in the parent change. Does Phone Saver get the redacted file even without this now?",
       "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "deeb570d_c9b456a6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T22:59:36Z",
+      "side": 1,
+      "message": "Yes, Phone Saver still gets redacted, so I don\u0027t know what this does. I\u0027ll abandon it but resurrect if somehow needed or just squash into its parent if that happens.",
+      "parentUuid": "bde1e0cb_e99d5848",
+      "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
