@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a7022523_c04eea55",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T22:01:00Z",
+      "side": 1,
+      "message": "From logs, it looks like it is because `com.android.externalstorage` itself is being evaluated and it does not have `MANAGE_MEDIA` but does have `MANAGE_EXTERNAL_STORAGE`. So we should probably check for both.",
+      "parentUuid": "37b5e7dd_2bf7d471",
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "ce22c530_7755d1dc",
         "filename": "src/com/android/providers/media/MediaProvider.java",
         "patchSetId": 8
