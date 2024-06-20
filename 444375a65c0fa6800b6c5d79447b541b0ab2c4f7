@@ -18,6 +18,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7e8ce6af_23f03a77",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:26:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a02ff8ef_b8399cfd",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c56cee3a_7b65cfa7",
@@ -53,6 +71,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7837dbb5_cbf37609",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:26:16Z",
+      "side": 1,
+      "message": "This is now working with Aves Libre. Grant it manage media, it can see the GPS coordinates. Don\u0027t, and it gets 0s and \"sea level\".",
+      "parentUuid": "09c8612d_06c39264",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dd09adcf_f7162321",
@@ -66,6 +102,24 @@
       "writtenOn": "2024-06-20T21:10:15Z",
       "side": 1,
       "message": "I don\u0027t think we need this. This method is only called from the method above it anyway.",
+      "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a4c4853f_82da1ca3",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:26:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd09adcf_f7162321",
       "revId": "444375a65c0fa6800b6c5d79447b541b0ab2c4f7",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
