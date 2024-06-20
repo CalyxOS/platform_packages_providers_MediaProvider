@@ -53,6 +53,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7711a109_84c747a3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T22:56:17Z",
+      "side": 1,
+      "message": "It was a bit more complicated. Fixed in MediaProvider.java PS9.",
+      "parentUuid": "a7022523_c04eea55",
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ce22c530_7755d1dc",
@@ -66,6 +84,30 @@
       "writtenOn": "2024-06-20T21:44:34Z",
       "side": 1,
       "message": "Would be better as `callingOrReceivingPackageHasPermission` to match the terms used elsewhere.",
+      "range": {
+        "startLine": 9593,
+        "startChar": 20,
+        "endLine": 9593,
+        "endChar": 49
+      },
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "773c646b_506a9183",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 9593,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T22:56:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce22c530_7755d1dc",
       "range": {
         "startLine": 9593,
         "startChar": 20,
