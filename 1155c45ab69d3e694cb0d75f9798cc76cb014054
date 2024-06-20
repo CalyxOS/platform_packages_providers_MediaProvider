@@ -20,6 +20,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "37b5e7dd_2bf7d471",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-20T21:54:22Z",
+      "side": 1,
+      "message": "Aves Libre gets redacted location metadata when using Open With from Files. It has MANAGE_MEDIA so this shouldn\u0027t happen.",
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "ce22c530_7755d1dc",
         "filename": "src/com/android/providers/media/MediaProvider.java",
         "patchSetId": 8
