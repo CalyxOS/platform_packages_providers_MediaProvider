@@ -70,6 +70,24 @@
       "parentUuid": "72fb234a_186169a0",
       "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cdd612fd_32bd450a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-24T16:27:53Z",
+      "side": 1,
+      "message": "Yes. They are not needed for LeafPic Revived, but they are needed for Phone Saver as a share target.",
+      "parentUuid": "42f16520_248d7c93",
+      "revId": "7da901bc1e8a766f4d56efe7c2d49d7c51e484bf",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
