@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e740fe50_8d36d18d",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 11608,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-24T17:33:57Z",
+      "side": 1,
+      "message": "Unused method, remove",
+      "revId": "05b05406a041c866dffe625b5a62a37abee65804",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
