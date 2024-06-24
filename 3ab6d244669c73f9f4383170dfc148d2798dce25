@@ -18,6 +18,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2eb01636_48961625",
+        "filename": "src/com/android/providers/media/LocalCallingIdentity.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-24T23:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c66df92_7801f6e7",
+      "revId": "3ab6d244669c73f9f4383170dfc148d2798dce25",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "12f4e2ed_db5052d7",
@@ -35,6 +53,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e57ef38_952af4a3",
+        "filename": "src/com/android/providers/media/LocalCallingIdentity.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-24T23:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12f4e2ed_db5052d7",
+      "revId": "3ab6d244669c73f9f4383170dfc148d2798dce25",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6507fb56_fa69c19e",
@@ -48,6 +84,24 @@
       "writtenOn": "2024-06-24T20:15:30Z",
       "side": 1,
       "message": "build error, provide context to the function",
+      "revId": "3ab6d244669c73f9f4383170dfc148d2798dce25",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1dd2e024_daf3350e",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-24T23:04:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6507fb56_fa69c19e",
       "revId": "3ab6d244669c73f9f4383170dfc148d2798dce25",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
