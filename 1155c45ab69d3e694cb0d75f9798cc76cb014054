@@ -73,6 +73,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "828d5321_1b89e0e5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-24T20:14:14Z",
+      "side": 1,
+      "message": "Implemented (not yet tested), but I\u0027m concerned about the performance impact of checking the setting so frequently. It may be better to check it once and observe its change, setting it to a variable.",
+      "parentUuid": "bfc7d25c_0a061400",
+      "revId": "1155c45ab69d3e694cb0d75f9798cc76cb014054",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "ce22c530_7755d1dc",
         "filename": "src/com/android/providers/media/MediaProvider.java",
         "patchSetId": 8
