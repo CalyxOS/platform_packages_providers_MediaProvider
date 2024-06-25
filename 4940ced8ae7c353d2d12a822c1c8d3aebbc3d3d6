@@ -16,6 +16,24 @@
       "message": "@t@grobox.de Looking for your thoughts on  what I\u0027m doing here in particular, which is an attempt to cache a secure setting transparently from callers to keep performance from degrading in MediaProvider. The goal is to cache the new `Settings.Secure.STRICT_LOCATION_REDACTION` setting so that it doesn\u0027t need to be queried unnecessarily and repeatedly.\n\nHere, I\u0027m doing it in such a way that the callers of this function, which span across a couple of classes (and sometimes multiple objects, like for LocalCallingIdentity), don\u0027t need to think about caching it themselves, but I\u0027m not sure if the way this is done is too much bad form.\n\nFrom what I\u0027ve tried, this seems to at least *work*. My areas of concern are in using static fields above - which I *think* should be functionally okay, assuming all contexts are equal like the comment says, and like they seem to be from testing - and in if/when the ContentObserver might become stale, if that\u0027s even possible, and how to tell.\n\nOr, maybe you have an idea of a better way to handle something like this, or pitfalls that could come from doing it this way?",
       "revId": "4940ced8ae7c353d2d12a822c1c8d3aebbc3d3d6",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7165b980_dc135620",
+        "filename": "src/com/android/providers/media/util/PermissionUtils.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-06-25T19:41:30Z",
+      "side": 1,
+      "message": "Acknowledged, I switched it to a helper class setup that\u0027s structurally a bit less bad, in my mind.",
+      "parentUuid": "962250ed_cda07698",
+      "revId": "4940ced8ae7c353d2d12a822c1c8d3aebbc3d3d6",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
