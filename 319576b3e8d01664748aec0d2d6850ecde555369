@@ -34,6 +34,24 @@
       "parentUuid": "7ecd57ea_f418a2ad",
       "revId": "319576b3e8d01664748aec0d2d6850ecde555369",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3dd1a15c_99b3be10",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-08-01T21:23:03Z",
+      "side": 1,
+      "message": "Given how old this change is, and the fact that I never really got it working - yes, safe to assume this never worked, and has bugs.\n\nThe goal still stands, to have a way to redact all EXIF data. We could either have a system-wide toggle for it (maybe not?), or just wait until we do the v2 of the location redaction toggle making it per each sharing instance (so showing it in the share sheet and file picker and what not) - and handle this then.\n\nRegardless, at least for testing, the full redaction should still work, so that\u0027s something to figure out - that\u0027s what I had intended to do here.",
+      "parentUuid": "a082af58_c78fb2d0",
+      "revId": "319576b3e8d01664748aec0d2d6850ecde555369",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
