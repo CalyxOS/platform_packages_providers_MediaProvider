@@ -162,6 +162,7 @@ import static com.android.providers.media.util.FileUtils.isDownload;
 import static com.android.providers.media.util.FileUtils.isExternalMediaDirectory;
 import static com.android.providers.media.util.FileUtils.isObbOrChildRelativePath;
 import static com.android.providers.media.util.FileUtils.sanitizePath;
+import static com.android.providers.media.util.FileUtils.throwIfPathContainsIgnorableCodepoints;
 import static com.android.providers.media.util.FileUtils.toFuseFile;
 import static com.android.providers.media.util.Logging.LOGV;
 import static com.android.providers.media.util.Logging.TAG;
@@ -319,6 +320,7 @@ import com.android.providers.media.stableuris.dao.BackupIdRow;
 import com.android.providers.media.util.CachedSupplier;
 import com.android.providers.media.util.DatabaseUtils;
 import com.android.providers.media.util.FileUtils;
+import com.android.providers.media.util.FileUtils.IgnorableCodepointException;
 import com.android.providers.media.util.ForegroundThread;
 import com.android.providers.media.util.Logging;
 import com.android.providers.media.util.LongArray;
@@ -961,6 +963,7 @@ public class MediaProvider extends ContentProvider {
     protected void updateQuotaTypeForUri(@NonNull FileRow row) {
         final String volumeName = row.getVolumeName();
         final String path = row.getPath();
+        throwIfPathContainsIgnorableCodepoints(path, mCallingIdentity.get().uid);
 
         // Quota type is only updated for external primary volume
         if (!MediaStore.VOLUME_EXTERNAL_PRIMARY.equalsIgnoreCase(volumeName)) {
@@ -2401,6 +2404,8 @@ public class MediaProvider extends ContentProvider {
                         + ", mediaCapabilitiesUid " + mediaCapabilitiesUid);
                 transcodeUid = readUid;
             }
+            throwIfPathContainsIgnorableCodepoints(src, transcodeUid);
+            throwIfPathContainsIgnorableCodepoints(dst, transcodeUid);
             return mTranscodeHelper.transcode(src, dst, transcodeUid, transformsReason);
         }
         return true;
@@ -2420,6 +2425,7 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public FileLookupResult onFileLookupForFuse(String path, int uid, int tid) {
+        throwIfPathContainsIgnorableCodepoints(path, uid);
         uid = getBinderUidForFuse(uid, tid);
         // Use MediaProviders UserId as the caller might be calling cross profile.
         final int userId = UserHandle.myUserId();
@@ -2961,10 +2967,15 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public String[] getFilesInDirectoryForFuse(String path, int uid) {
+        try {
+            throwIfPathContainsIgnorableCodepoints(path, uid);
+        } catch (IgnorableCodepointException e) {
+            Log.e(TAG, "Failed to get files in directory due to ignorable codepoints", e);
+            return new String[] {""};
+        }
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
-
         try {
             if (isPrivatePackagePathNotAccessibleByCaller(path)) {
                 return new String[] {""};
@@ -2982,9 +2993,7 @@ public class MediaProvider extends ContentProvider {
                 return new String[] {""};
             }
 
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingButDeniedLegacy(/*forWrite*/ false)) {
                 return new String[] {""};
             }
 
@@ -3048,6 +3057,7 @@ public class MediaProvider extends ContentProvider {
      * Checks if given {@code mimeType} is supported in {@code path}.
      */
     private boolean isMimeTypeSupportedInPath(String path, String mimeType) {
+        throwIfPathContainsIgnorableCodepoints(path, mCallingIdentity.get().uid);
         final String supportedPrimaryMimeType;
         final int match = matchUri(getContentUriForFile(path, mimeType), true);
         switch (match) {
@@ -3580,6 +3590,13 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public int renameForFuse(String oldPath, String newPath, int uid) {
+        try {
+            throwIfPathContainsIgnorableCodepoints(oldPath, uid);
+            throwIfPathContainsIgnorableCodepoints(newPath, uid);
+        } catch (IgnorableCodepointException e) {
+            Log.e(TAG, "Failed to rename due to ignorable codepoints", e);
+            return OsConstants.EPERM;
+        }
         final String errorMessage = "Rename " + oldPath + " to " + newPath + " failed. ";
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
@@ -3605,9 +3622,7 @@ public class MediaProvider extends ContentProvider {
                     && shouldBypassFuseRestrictions(/*forWrite*/ true, newPath)) {
                 return renameUncheckedForFuse(oldPath, newPath);
             }
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingButDeniedLegacy(/* forWrite */ true)) {
                 return OsConstants.EACCES;
             }
 
@@ -4718,6 +4733,9 @@ public class MediaProvider extends ContentProvider {
                 }
             }
 
+            throwIfPathContainsIgnorableCodepoints(res.getAbsolutePath(),
+                    mCallingIdentity.get().uid);
+
             // Consider allowing external media directory of calling package
             if (!validPath) {
                 final String pathOwnerPackage = extractPathOwnerPackageName(res.getAbsolutePath());
@@ -4959,6 +4977,7 @@ public class MediaProvider extends ContentProvider {
 
     private long insertDirectory(@NonNull SQLiteDatabase db, @NonNull String path) {
         if (LOGV) Log.v(TAG, "inserting directory " + path);
+        throwIfPathContainsIgnorableCodepoints(path, mCallingIdentity.get().uid);
         ContentValues values = new ContentValues();
         values.put(FileColumns.FORMAT, MtpConstants.FORMAT_ASSOCIATION);
         values.put(FileColumns.DATA, path);
@@ -6670,6 +6689,14 @@ public class MediaProvider extends ContentProvider {
                             final int isDownload = c.getInt(3);
                             final String mimeType = c.getString(4);
 
+                            try {
+                                throwIfPathContainsIgnorableCodepoints(data,
+                                        mCallingIdentity.get().uid);
+                            } catch (IgnorableCodepointException e) {
+                                Log.e(TAG, "Path deletion failed due to ignorable codepoints", e);
+                                continue;
+                            }
+
                             // TODO(b/188782594) Consider logging mime type access on delete too.
 
                             // Forget that caller is owner of this item
@@ -6711,7 +6738,16 @@ public class MediaProvider extends ContentProvider {
                     if (c != null) {
                         try {
                             while (c.moveToNext()) {
-                                deleteIfAllowed(uri, extras, c.getString(0));
+                                final String path = c.getString(0);
+                                try {
+                                    throwIfPathContainsIgnorableCodepoints(path,
+                                            mCallingIdentity.get().uid);
+                                } catch (IgnorableCodepointException e) {
+                                    Log.e(TAG, "Path deletion failed due to ignorable codepoints",
+                                            e);
+                                    continue;
+                                }
+                                deleteIfAllowed(uri, extras, path);
                             }
                         } finally {
                             FileUtils.closeQuietly(c);
@@ -6755,6 +6791,13 @@ public class MediaProvider extends ContentProvider {
             final long id = c.getLong(2);
             final int isDownload = c.getInt(3);
             final String mimeType = c.getString(4);
+
+            try {
+                throwIfPathContainsIgnorableCodepoints(data, mCallingIdentity.get().uid);
+            } catch (IgnorableCodepointException e) {
+                Log.e(TAG, "Path deletion failed due to ignorable codepoints", e);
+                return 0;
+            }
 
             final Uri uriGranted = getOtherUriGrantsForPath(data, mediaType, Long.toString(id),
                     /* forWrite */ true);
@@ -8129,6 +8172,12 @@ public class MediaProvider extends ContentProvider {
                     new String[] { idString, idString })) {
                 while (c.moveToNext()) {
                     String path = c.getString(0);
+                    try {
+                        throwIfPathContainsIgnorableCodepoints(path, mCallingIdentity.get().uid);
+                    } catch (IgnorableCodepointException e) {
+                        Log.e(TAG, "Failed to invalidate thumbnail due to ignorable codepoints", e);
+                        continue;
+                    }
                     deleteIfAllowed(uri, Bundle.EMPTY, path);
                 }
             }
@@ -9693,6 +9742,11 @@ public class MediaProvider extends ContentProvider {
             if (TextUtils.isEmpty(data)) {
                 throw new FileNotFoundException("Missing path for " + uri);
             } else {
+                try {
+                    throwIfPathContainsIgnorableCodepoints(data, mCallingIdentity.get().uid);
+                } catch (IgnorableCodepointException e) {
+                    throw new IOException("Open file failed due to ignorable codepoints", e);
+                }
                 file = new File(data).getCanonicalFile();
             }
             ownerPackageName = c.getString(1);
@@ -9942,6 +9996,14 @@ public class MediaProvider extends ContentProvider {
         return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_GRANTED); // guard
     }
 
+    private boolean isCallingPackageRequestingButDeniedLegacy(boolean forWrite) {
+        if (!isCallingPackageRequestingLegacy()) {
+            return false;
+        }
+        return forWrite ? !isCallingPackageLegacyWrite()
+                : !isCallingPackageLegacyRead();
+    }
+
     private boolean shouldBypassDatabase(int uid) {
         if (uid != android.os.Process.SHELL_UID && isCallingPackageManager()) {
             return mCallingIdentity.get().shouldBypassDatabase(false /*isSystemGallery*/);
@@ -10002,18 +10064,6 @@ public class MediaProvider extends ContentProvider {
      * </ul>
      */
     private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath) {
-        return shouldBypassFuseRestrictions(forWrite, filePath, /* allowLegacy */ true);
-    }
-    private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath,
-            boolean allowLegacy) {
-        boolean isRequestingLegacyStorage = forWrite ? isCallingPackageLegacyWrite()
-                : isCallingPackageLegacyRead();
-        final boolean shouldAllowLegacy = StrictLocationRedactionHelper.getInstance(getContext())
-                .isSettingEnabled() ? allowLegacy : true;
-        if (allowLegacy && isRequestingLegacyStorage) {
-            return true;
-        }
-
         if (isCallingPackageManager()) {
             return true;
         }
@@ -10114,6 +10164,7 @@ public class MediaProvider extends ContentProvider {
     @NonNull
     private long[] getRedactionRangesForFuse(String path, String ioPath, int original_uid, int uid,
             int tid, boolean forceRedaction) throws IOException {
+        // TODO/FIXME: Should we check for ignorable codepoints here?
         // |ioPath| might refer to a transcoded file path (which is not indexed in the db)
         // |path| will always refer to a valid _data column
         // We use |ioPath| for the filesystem access because in the case of transcoding,
@@ -10146,8 +10197,7 @@ public class MediaProvider extends ContentProvider {
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         try {
             if (!isRedactionNeeded()
-                    || shouldBypassFuseRestrictions(/* forWrite */ false, path,
-                            /* allowLegacy */ false)) {
+                    || shouldBypassFuseRestrictions(/* forWrite */ false, path)) {
                 return new long[0];
             }
 
@@ -10316,6 +10366,12 @@ public class MediaProvider extends ContentProvider {
         }
 
         try {
+            try {
+                throwIfPathContainsIgnorableCodepoints(path, uid);
+                throwIfPathContainsIgnorableCodepoints(ioPath, uid);
+            } catch (IgnorableCodepointException e) {
+                throw new IOException("Open failed due to ignorable codepoints", e);
+            }
             boolean forceRedaction = false;
             String redactedUriId = null;
             if (isSyntheticPath(path, userId)) {
@@ -10356,9 +10412,7 @@ public class MediaProvider extends ContentProvider {
                         redact ? getRedactionRangesForFuse(path, ioPath, originalUid, uid, tid,
                                 forceRedaction) : new long[0]);
             }
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingButDeniedLegacy(forWrite)) {
                 return new FileOpenResult(OsConstants.EACCES /* status */, originalUid,
                         mediaCapabilitiesUid, new long[0]);
             }
@@ -10610,6 +10664,7 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public int insertFileIfNecessaryForFuse(@NonNull String path, int uid) {
+        throwIfPathContainsIgnorableCodepoints(path, uid);
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
@@ -10666,9 +10721,7 @@ public class MediaProvider extends ContentProvider {
                 return 0;
             }
 
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingButDeniedLegacy(/* forWrite */ true)) {
                 return OsConstants.EPERM;
             }
 
@@ -10738,6 +10791,7 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public int deleteFileForFuse(@NonNull String path, int uid) throws IOException {
+        throwIfPathContainsIgnorableCodepoints(path, uid);
         final LocalCallingIdentity localCallingIdentity = getCachedCallingIdentityForFuse(uid);
         final LocalCallingIdentity token = clearLocalCallingIdentity(localCallingIdentity);
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
@@ -10752,11 +10806,10 @@ public class MediaProvider extends ContentProvider {
                 return deleteFileUnchecked(path, localCallingIdentity);
             }
 
-            final boolean shouldBypass = shouldBypassFuseRestrictions(/*forWrite*/ true, path);
+            final boolean shouldBypass =
+                    shouldBypassFuseRestrictions(/*forWrite*/ true, path);
 
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (!shouldBypass && isCallingPackageRequestingLegacy()) {
+            if (!shouldBypass && isCallingPackageRequestingButDeniedLegacy(/* forWrite */ true)) {
                 return OsConstants.EPERM;
             }
 
@@ -10824,6 +10877,12 @@ public class MediaProvider extends ContentProvider {
     @Keep
     public int isDirAccessAllowedForFuse(@NonNull String path, int uid,
             @DirectoryAccessType int accessType) {
+        try {
+            throwIfPathContainsIgnorableCodepoints(path, uid);
+        } catch (IgnorableCodepointException e) {
+            Log.e(TAG, "Dir access not allowed due to ignorable codepoints", e);
+            return OsConstants.EPERM;
+        }
         Preconditions.checkArgumentInRange(accessType, 1, DIRECTORY_ACCESS_FOR_DELETE,
                 "accessType");
 
@@ -10831,6 +10890,7 @@ public class MediaProvider extends ContentProvider {
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
+
         try {
             if ("/storage/emulated".equals(path)) {
                 return OsConstants.EPERM;
@@ -10856,7 +10916,7 @@ public class MediaProvider extends ContentProvider {
 
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingButDeniedLegacy(/* forWrite */ !forRead)) {
                 return OsConstants.EACCES;
             }
             // This is a non-legacy app. Rest of the directories are generally writable

@@ -1180,7 +1180,6 @@ public class FileUtils {
     }
 
     public static @Nullable String extractOwnerPackageNameFromRelativePath(@Nullable String path) {
-        if (path == null) return null;
         final Matcher m = PATTERN_OWNED_RELATIVE_PATH.matcher(path);
         if (m.matches()) {
             return m.group(1);
@@ -1211,6 +1210,11 @@ public class FileUtils {
 
     /**
      * Returns true if path is Android/data or Android/obb path.
+     *
+     * Warning: The kernel may disregard ignorable codepoints in a path. This could mean that we
+     * will not match a path that includes ignorable codepoints even if that path is functionally
+     * identical (the same path) to the one we intend to match. The provided path should therefore
+     * be preprocessed with maybeRemoveIgnorableCodepoints.
      */
     public static boolean isDataOrObbPath(@Nullable String path) {
         if (path == null) return false;
@@ -1220,6 +1224,11 @@ public class FileUtils {
 
     /**
      * Returns true if relative path is Android/data or Android/obb path.
+     *
+     * Warning: The kernel may disregard ignorable codepoints in a path. This could mean that we
+     * will not match a path that includes ignorable codepoints even if that path is functionally
+     * identical (the same path) to the one we intend to match. The provided path should therefore
+     * be preprocessed with maybeRemoveIgnorableCodepoints.
      */
     public static boolean isDataOrObbRelativePath(@Nullable String path) {
         if (path == null) return false;
@@ -1229,6 +1238,11 @@ public class FileUtils {
 
     /**
      * Returns true if relative path is Android/obb path.
+     *
+     * Warning: The kernel may disregard ignorable codepoints in a path. This could mean that we
+     * will not match a path that includes ignorable codepoints even if that path is functionally
+     * identical (the same path) to the one we intend to match. The provided path should therefore
+     * be preprocessed with maybeRemoveIgnorableCodepoints.
      */
     public static boolean isObbOrChildRelativePath(@Nullable String path) {
         if (path == null) return false;
@@ -1860,5 +1874,28 @@ public class FileUtils {
     public static File canonicalize(@NonNull File file) throws IOException {
         Objects.requireNonNull(file);
         return file.getCanonicalFile();
+    }
+
+    /** Throw an IllegalArgumentException if the provided path contains ignorable codepoints. */
+    public static void throwIfPathContainsIgnorableCodepoints(
+            @Nullable final String path,
+            final int uid) {
+        if (path == null) {
+            return;
+        }
+        if (path.codePoints().anyMatch(Character::isIdentifierIgnorable)) {
+            throw new IgnorableCodepointException(path, uid);
+        }
+    }
+
+    public static class IgnorableCodepointException extends IllegalArgumentException {
+        public final String path;
+        public final int uid;
+        public IgnorableCodepointException(final String path, final int uid) {
+            super("Provided path from uid " + uid + " must not contain ignorable codepoints: "
+                    + path);
+            this.path = path;
+            this.uid = uid;
+        }
     }
 }
