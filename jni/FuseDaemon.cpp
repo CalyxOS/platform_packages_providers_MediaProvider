@@ -49,6 +49,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <unicode/utext.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -125,6 +126,7 @@ const std::regex PATTERN_BPF_BACKING_PATH("^/storage/[^/]+/[0-9]+/Android/(data|
 static constexpr char TRANSFORM_SYNTHETIC_DIR[] = "synthetic";
 static constexpr char TRANSFORM_TRANSCODE_DIR[] = "transcode";
 static constexpr char PRIMARY_VOLUME_PREFIX[] = "/storage/emulated";
+static constexpr int PRIMARY_VOLUME_PREFIX_LEN = std::size(PRIMARY_VOLUME_PREFIX) - 1;
 static constexpr char STORAGE_PREFIX[] = "/storage";
 
 static constexpr char VOLUME_INTERNAL[] = "internal";
@@ -542,10 +544,118 @@ static inline bool is_transforms_dir_path(const string& path, struct fuse* fuse)
     return android::base::StartsWithIgnoreCase(path, fuse->GetTransformsDir());
 }
 
+/*
+ * Check if the provided path is a data or obb path under /storage/emulated/0/Android that might
+ * be the subject of confusion in applying restrictions due to case-folding and ignorable
+ * codepoints. (0 may be any folder; we don't care what it is.)
+ *
+ * The "/storage/emulated" part of the path is unaffected, so it is not checked. Everything else
+ * after the next / could be affected, but we only care about that if this is one of the paths
+ * described above, so we painstakingly verify this per-character.
+ */
+bool is_data_or_obb_path_with_ignorable_codepoints(const string& path, struct fuse* fuse) {
+    if (__builtin_available(android 31, *)) {
+        if (!android::base::StartsWith(path, PRIMARY_VOLUME_PREFIX)) {
+            // Not an applicable "/storage/emulated" path. (Ignorable codepoints don't matter at
+            // this part of the path, so we don't even need to check for them.)
+            return false;
+        }
+        // These libicu unicode methods require SDK 31 or above. Otherwise, we return false.
+        const char* s = path.c_str();
+        UErrorCode status = U_ZERO_ERROR;
+        UText* ut = utext_openUTF8(nullptr, s, -1, &status);
+        if (U_FAILURE(status)) {
+            LOG(WARNING) << "Could not decode path as UTF-8 (error " << status << "): " << path;
+            return false;
+        }
+        // Text data for comparisons. Must be lowercase. Cannot be empty strings.
+        const std::string textPhaseData[] = {
+                "android/",
+                "data", // or else try phase 2...
+                "obb",  // ...which depends on the fact they start with a different character!
+                "/"     // slash is optional only if the string ends right after the above
+        };
+        int charAt = 0;
+        int textPhase = -2;
+        bool hasAnyIgnorable = false;
+        for (UChar32 c = utext_next32From(ut, PRIMARY_VOLUME_PREFIX_LEN);
+             c >= 0;
+             c = utext_next32(ut)) {
+            if (textPhase == -2) {
+                // Expecting a "/" following "/storage/emulated".
+                if (c != '/') {
+                    break;
+                }
+                textPhase++;
+                continue;
+            }
+            if (textPhase == -1) {
+                // This is the user ID section. We don't care what it is, but from here on out,
+                // ignorable codepoints are important to notice.
+                if (u_isIDIgnorable(c)) {
+                    hasAnyIgnorable = true;
+                } else if (c == '/') {
+                    textPhase++;
+                }
+                continue;
+            }
+            if (textPhase >= 0) {
+                // Now we handle everything after "/storage/emulated/0/" (or whatever the user is).
+                if (u_isIDIgnorable(c)) {
+                    hasAnyIgnorable = true;
+                    continue;
+                }
+                const UChar32 lower = u_tolower(c);
+                if (lower == textPhaseData[textPhase].at(charAt)) {
+                    charAt++;
+                } else if (textPhase == 1 && charAt == 0 && lower == textPhaseData[2].at(0)) {
+                    // Try phase 2 (matching "obb"), the alternate to phase 1 (matching "data").
+                    // THIS ONLY WORKS BECAUSE THEY DO NOT START WITH THE SAME CHARACTER.
+                    textPhase = 2;
+                    charAt++;
+                } else {
+                    // We stopped matching, so it's time to bail out.
+                    // Set textPhase to 0 so it doesn't look like we made it far enough.
+                    textPhase = 0;
+                    break;
+                }
+                if (charAt == textPhaseData[textPhase].length()) {
+                    charAt = 0;
+                    if (textPhase == 1) {
+                        // Phase 2 was just an alternate for 1, so skip it.
+                        textPhase = 3;
+                    } else {
+                        textPhase++;
+                    }
+                }
+            }
+            if (textPhase == std::size(textPhaseData)) {
+                // We matched it all, including the last slash (with potential for further
+                // characters in the path).
+                utext_close(ut);
+                return hasAnyIgnorable;
+            }
+        }
+        if (textPhase == std::size(textPhaseData) - 1) {
+            // Matched to the final phase (slash), which is optional, or beyond.
+            utext_close(ut);
+            return hasAnyIgnorable;
+        }
+        utext_close(ut);
+        return false;
+    }
+    return false;
+}
+
 static std::unique_ptr<mediaprovider::fuse::FileLookupResult> validate_node_path(
         const std::string& path, const std::string& name, fuse_req_t req, int* error_code,
         struct fuse_entry_param* e, const FuseOp op) {
     struct fuse* fuse = get_fuse(req);
+    if (is_data_or_obb_path_with_ignorable_codepoints(path, fuse)) {
+        LOG(WARNING) << "Failing validate_node_path due to ignorable codepoints " << path;
+        *error_code = EINVAL;
+        return nullptr;
+    }
     const struct fuse_ctx* ctx = fuse_req_ctx(req);
     memset(e, 0, sizeof(*e));
 
