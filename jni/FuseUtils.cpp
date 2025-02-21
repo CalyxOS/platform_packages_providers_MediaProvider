@@ -18,7 +18,9 @@
 
 #include <string>
 #include <vector>
+#include <unicode/utext.h>
 
+#include "android-base/logging.h"
 #include "android-base/strings.h"
 
 using std::string;
@@ -49,6 +51,38 @@ bool containsMount(const string& path) {
     return android::base::EqualsIgnoreCase(path_suffix, android_suffix) ||
            android::base::EqualsIgnoreCase(path_suffix, data_suffix) ||
            android::base::EqualsIgnoreCase(path_suffix, obb_suffix);
+}
+
+std::string removeDefaultIgnorableCodepoints(const std::string_view& str) {
+    // These libicu unicode methods require SDK 31 or above. Otherwise, we return an empty string.
+    if (__builtin_available(android 31, *)) {
+        UErrorCode error_code = U_ZERO_ERROR;
+        UText *ut = utext_openUTF8(nullptr,
+                                   str.data(),
+                                   (int64_t) str.length(),
+                                   &error_code);
+        if (ut == nullptr || U_FAILURE(error_code)) {
+            LOG(WARNING) << "Could not decode string as UTF-8: error " << error_code << ": " << str;
+            return "";
+        }
+
+        std::string out;
+        // Arbitrary +8 for some extra room.
+        out.reserve(str.length() + 8);
+        for (UChar32 c = utext_next32From(ut, 0);
+             c >= 0;
+             c = utext_next32(ut)) {
+            if (!u_hasBinaryProperty(c, UProperty::UCHAR_DEFAULT_IGNORABLE_CODE_POINT)) {
+                char utf8[4];
+                int size = 0;
+                U8_APPEND_UNSAFE(utf8, size, c);
+                out.append(utf8, size);
+            }
+        }
+        utext_close(ut);
+        return out;
+    }
+    return "";
 }
 
 }  // namespace fuse
