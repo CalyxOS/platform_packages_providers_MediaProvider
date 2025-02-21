@@ -49,6 +49,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <unicode/utext.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -542,10 +543,36 @@ static inline bool is_transforms_dir_path(const string& path, struct fuse* fuse)
     return android::base::StartsWithIgnoreCase(path, fuse->GetTransformsDir());
 }
 
+inline bool is_path_with_ignorable_codepoints(const string& path, struct fuse* fuse) {
+    if (__builtin_available(android 31, *)) {
+        // These libicu unicode methods require SDK 31 or above. Otherwise, we return false.
+        const char* s = path.c_str();
+        UErrorCode status = U_ZERO_ERROR;
+        UText* ut = utext_openUTF8(nullptr, s, -1, &status);
+        if (U_FAILURE(status)) {
+            LOG(WARNING) << "Could not decode path as UTF-8 (error " << status << "): " << path;
+            return false;
+        }
+        for (UChar32 c = utext_next32From(ut, 0); c >= 0; c = utext_next32(ut)) {
+            if (u_isIDIgnorable(c)) {
+                utext_close(ut);
+                return true;
+            }
+        }
+        utext_close(ut);
+    }
+    return false;
+}
+
 static std::unique_ptr<mediaprovider::fuse::FileLookupResult> validate_node_path(
         const std::string& path, const std::string& name, fuse_req_t req, int* error_code,
         struct fuse_entry_param* e, const FuseOp op) {
     struct fuse* fuse = get_fuse(req);
+    if (is_path_with_ignorable_codepoints(path, fuse)) {
+        LOG(WARNING) << "Failing validate_node_path due to ignorable codepoints " << path;
+        *error_code = EINVAL;
+        return nullptr;
+    }
     const struct fuse_ctx* ctx = fuse_req_ctx(req);
     memset(e, 0, sizeof(*e));
 
