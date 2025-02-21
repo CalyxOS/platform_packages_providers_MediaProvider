@@ -49,6 +49,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#include <unicode/utext.h>
 #include <unistd.h>
 
 #include <iostream>
@@ -121,6 +122,8 @@ const std::regex PATTERN_OWNED_PATH(
         std::regex_constants::icase);
 const std::regex PATTERN_BPF_BACKING_PATH("^/storage/[^/]+/[0-9]+/Android/(data|obb)$",
                                           std::regex_constants::icase);
+const std::regex PATTERN_PRIVATE_SUBPATH("^/[^/]+/Android/(data|obb)",
+                                         std::regex_constants::icase);
 
 static constexpr char TRANSFORM_SYNTHETIC_DIR[] = "synthetic";
 static constexpr char TRANSFORM_TRANSCODE_DIR[] = "transcode";
@@ -542,10 +545,74 @@ static inline bool is_transforms_dir_path(const string& path, struct fuse* fuse)
     return android::base::StartsWithIgnoreCase(path, fuse->GetTransformsDir());
 }
 
+/*
+ * Check if the provided path is a data or obb path under /storage/emulated/0/Android that might
+ * be the subject of confusion in applying restrictions due to the presence of default ignorable
+ * codepoints. (0 may be any folder; we don't care what it is.)
+ *
+ * The "/storage/emulated" part of the path is unaffected, so it is not checked for such codepoints.
+ * From there on, we evaluate the next 3 components of the path (e.g. /0/Android/data) to see if
+ * they are affected as described. (Note that the Unicode characters of subpaths of Android/data or
+ * Android/obb are not relevant for our purposes, so they are not checked.)
+ *
+ * For Android SDK < 31, this will always return false, as the required libicu functions
+ * are not available.
+ */
+bool is_data_or_obb_path_with_default_ignorable_codepoints(const std::string_view& path) {
+    if (__builtin_available(android 31, *)) {
+        constexpr size_t primary_volume_prefix_len = std::size(PRIMARY_VOLUME_PREFIX) - 1;
+
+        // Ensure the beginning of the path matches /storage/emulated
+        if (path.length() < primary_volume_prefix_len) {
+            return false;
+        }
+        std::string_view path_beginning(path.data(), primary_volume_prefix_len);
+        if (path_beginning != PRIMARY_VOLUME_PREFIX) {
+            return false;
+        }
+
+        // Select the part of the path following /storage/emulated, e.g. /0/Android/data.
+        // Ensure there are at least three components in this relevant path.
+        size_t start = primary_volume_prefix_len;
+        for (int i = 0; i < 3; i++) {
+            start = path.find('/', start);
+            if (start == std::string::npos) {
+                return false;
+            }
+            start++;
+        }
+        size_t end = path.find('/', start);
+        if (end == std::string::npos) {
+            end = path.length();
+        }
+        const std::string_view relevant_path(
+                path.data() + primary_volume_prefix_len,
+                end - primary_volume_prefix_len);
+
+        const std::string filtered_relevant_path =
+                mediaprovider::fuse::removeDefaultIgnorableCodepoints(relevant_path);
+        if (filtered_relevant_path.empty()) {
+            // Decoding failure.
+            return true;
+        }
+
+        // Check if the path doesn't match the filtered path (contains default ignorable codepoints),
+        // and if it's a private subpath (i.e. /0/Android/data).
+        return relevant_path != filtered_relevant_path
+               && std::regex_match(filtered_relevant_path, PATTERN_PRIVATE_SUBPATH);
+    }
+    return false;
+}
+
 static std::unique_ptr<mediaprovider::fuse::FileLookupResult> validate_node_path(
         const std::string& path, const std::string& name, fuse_req_t req, int* error_code,
         struct fuse_entry_param* e, const FuseOp op) {
     struct fuse* fuse = get_fuse(req);
+    if (is_data_or_obb_path_with_default_ignorable_codepoints(path)) {
+        LOG(WARNING) << "Failing validate_node_path due to default ignorable codepoints: " << path;
+        *error_code = EINVAL;
+        return nullptr;
+    }
     const struct fuse_ctx* ctx = fuse_req_ctx(req);
     memset(e, 0, sizeof(*e));
 
