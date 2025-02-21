@@ -18,7 +18,9 @@
 
 #include <string>
 #include <vector>
+#include <unicode/utext.h>
 
+#include "android-base/logging.h"
 #include "android-base/strings.h"
 
 using std::string;
@@ -51,5 +53,59 @@ bool containsMount(const string& path) {
            android::base::EqualsIgnoreCase(path_suffix, obb_suffix);
 }
 
+<<<<<<< HEAD   (e27824 Merge tag 'android-15.0.0_r25' into staging/android15-qpr1_m)
+=======
+string getVolumeNameFromPath(const std::string& path) {
+    std::string volume_name = "";
+    if (!android::base::StartsWith(path, STORAGE_PREFIX)) {
+        volume_name = VOLUME_INTERNAL;
+    } else if (android::base::StartsWith(path, PRIMARY_VOLUME_PREFIX) || path == STORAGE_PREFIX) {
+        volume_name = VOLUME_EXTERNAL_PRIMARY;
+    } else {
+        // Use regex to extract volume name
+        std::regex volumeRegex(R"(/storage/([a-zA-Z0-9-]+)/)");
+        std::smatch match;
+        if (std::regex_search(path, match, volumeRegex)) {
+            volume_name = match[1].str();
+            // Convert to lowercase
+            std::transform(volume_name.begin(), volume_name.end(), volume_name.begin(), ::tolower);
+        }
+    }
+    return volume_name;
+}
+
+std::string removeDefaultIgnorableCodepoints(const std::string_view& str) {
+    // These libicu unicode methods require SDK 31 or above. Otherwise, we return an empty string.
+    if (__builtin_available(android 31, *)) {
+        UErrorCode error_code = U_ZERO_ERROR;
+        UText *ut = utext_openUTF8(nullptr,
+                                   str.data(),
+                                   (int64_t) str.length(),
+                                   &error_code);
+        if (ut == nullptr || U_FAILURE(error_code)) {
+            LOG(WARNING) << "Could not decode string as UTF-8: error " << error_code << ": " << str;
+            return "";
+        }
+
+        std::string out;
+        // Arbitrary +8 for some extra room.
+        out.reserve(str.length() + 8);
+        for (UChar32 c = utext_next32From(ut, 0);
+             c >= 0;
+             c = utext_next32(ut)) {
+            if (!u_hasBinaryProperty(c, UProperty::UCHAR_DEFAULT_IGNORABLE_CODE_POINT)) {
+                char utf8[4];
+                int size = 0;
+                U8_APPEND_UNSAFE(utf8, size, c);
+                out.append(utf8, size);
+            }
+        }
+        utext_close(ut);
+        return out;
+    }
+    return "";
+}
+
+>>>>>>> CHANGE (8739aa Reject private paths with ignorable codepoints)
 }  // namespace fuse
 }  // namespace mediaprovider

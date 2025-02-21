@@ -31,6 +31,24 @@ namespace fuse {
  */
 bool containsMount(const std::string& path);
 
+<<<<<<< HEAD   (e27824 Merge tag 'android-15.0.0_r25' into staging/android15-qpr1_m)
+=======
+/**
+ * Returns the volume name extracted from a given path.
+ */
+std::string getVolumeNameFromPath(const std::string& path);
+
+/**
+ * Removes any Unicode default ignorable codepoints from the provided string_view.
+ * Returns an empty string if a decoding failure occurs.
+ * Requires SDK 31 or above to use the required libicu functions. Otherwise, returns empty string.
+ * @param str The string_view from which to remove Unicode default ignorable codepoints.
+ * @return A new string without the default ignorable codepoints, or an empty string
+ *         if a decoding failure occurs or we are SDK < 31.
+ */
+std::string removeDefaultIgnorableCodepoints(const std::string_view& str);
+
+>>>>>>> CHANGE (8739aa Reject private paths with ignorable codepoints)
 }  // namespace fuse
 }  // namespace mediaprovider
 
