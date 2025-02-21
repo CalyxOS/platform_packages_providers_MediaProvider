@@ -1211,6 +1211,11 @@ public class FileUtils {
 
     /**
      * Returns true if path is Android/data or Android/obb path.
+     *
+     * Warning: The kernel may disregard ignorable codepoints in a path. This could mean that we
+     * will not match a path that includes ignorable codepoints even if that path is functionally
+     * identical (the same path) to the one we intend to match. The provided path should therefore
+     * be preprocessed with maybeRemoveIgnorableCodepoints.
      */
     public static boolean isDataOrObbPath(@Nullable String path) {
         if (path == null) return false;
@@ -1220,6 +1225,11 @@ public class FileUtils {
 
     /**
      * Returns true if relative path is Android/data or Android/obb path.
+     *
+     * Warning: The kernel may disregard ignorable codepoints in a path. This could mean that we
+     * will not match a path that includes ignorable codepoints even if that path is functionally
+     * identical (the same path) to the one we intend to match. The provided path should therefore
+     * be preprocessed with maybeRemoveIgnorableCodepoints.
      */
     public static boolean isDataOrObbRelativePath(@Nullable String path) {
         if (path == null) return false;
@@ -1229,6 +1239,11 @@ public class FileUtils {
 
     /**
      * Returns true if relative path is Android/obb path.
+     *
+     * Warning: The kernel may disregard ignorable codepoints in a path. This could mean that we
+     * will not match a path that includes ignorable codepoints even if that path is functionally
+     * identical (the same path) to the one we intend to match. The provided path should therefore
+     * be preprocessed with maybeRemoveIgnorableCodepoints.
      */
     public static boolean isObbOrChildRelativePath(@Nullable String path) {
         if (path == null) return false;
@@ -1860,5 +1875,38 @@ public class FileUtils {
     public static File canonicalize(@NonNull File file) throws IOException {
         Objects.requireNonNull(file);
         return file.getCanonicalFile();
+    }
+
+    /**
+     * Find and remove ignorable codepoints in a String, if any.
+     *
+     * @param string The String from which to remove ignorable codepoints.
+     * @return A new String without ignorable codepoints, or the same string if none were present.
+     */
+    @Nullable
+    public static String maybeRemoveIgnorableCodepoints(@Nullable final String string) {
+        // TODO: If possible, insert a check that makes this method simply return the provided
+        // string, if we can determine that the kernel does not special case ignorable code points,
+        // in which case none of this should be necessary. This might not be determinable and so
+        // it may require something like aflags.
+        if (string == null) {
+            return null;
+        }
+        StringBuilder sb = null;
+        int continueFrom = 0;
+        for (int i = 0; i < string.length(); i++) {
+            if (Character.isIdentifierIgnorable(string.codePointAt(i))) {
+                if (sb == null) {
+                    sb = new StringBuilder();
+                }
+                sb.append(string, continueFrom, i);
+                continueFrom = i + 1;
+            }
+        }
+        if (sb != null) {
+            sb.append(string, continueFrom, string.length());
+            return sb.toString();
+        }
+        return string;
     }
 }
