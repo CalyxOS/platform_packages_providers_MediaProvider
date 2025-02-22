@@ -89,6 +89,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -1908,5 +1909,84 @@ public class FileUtils {
             return sb.toString();
         }
         return string;
+    }
+
+    public static String getAlwaysVisibleEmulatedStorageRelativePath(String path, int userId) {
+        if (path == null) {
+            Log.d(TAG, "isPathAlwaysVisible: 1");
+            return null;
+        }
+        Log.d(TAG, "isPathAlwaysVisible: 1.5: " + path);
+        path = maybeRemoveIgnorableCodepoints(path);
+        // Only emulated storage should be always-visible.
+        final String emulatedStorage = "/storage/emulated/";
+        if (!path.startsWith(emulatedStorage)) {
+            Log.d(TAG, "isPathAlwaysVisible: 2: " + path);
+            return null;
+        }
+        final String emulatedStorageRelativePath = path.substring(emulatedStorage.length());
+
+        final String userIdString = String.valueOf(userId);
+        final List<String> allowedUsers = "0".equals(userIdString) ? List.of("0")
+                : List.of("0", userIdString);
+        String relativePath = null;
+        for (final String allowedUser : allowedUsers) {
+            if (allowedUser.equals(emulatedStorageRelativePath)) {
+                // Path is /storage/emulated/0 or /storage/emulated/$userId.
+                Log.d(TAG, "isPathAlwaysVisible: 3: " + path);
+                return "";
+            }
+            if (emulatedStorageRelativePath.startsWith(allowedUser + "/")) {
+                // Path is under /storage/emulated/0 or /storage/emulated/$userId;
+                // save the relative path (subpath).
+                relativePath = emulatedStorageRelativePath.substring(allowedUser.length() + 1);
+                Log.d(TAG, "isPathAlwaysVisible: 4: " + path);
+                break;
+            }
+        }
+        if (relativePath == null) {
+            // No match; the path is not under /storage/emulated/0 or /storage/emulated/$userId.
+            Log.d(TAG, "isPathAlwaysVisible: 5: " + path);
+            return null;
+        }
+        if (relativePath.isEmpty()) {
+            // Path is /storage/emulated/0/ or /storage/emulated/$userId/.
+            Log.d(TAG, "isPathAlwaysVisible: 6: " + path);
+            return "";
+        }
+        Log.d(TAG, "isPathAlwaysVisible: 7: " + relativePath);
+        return relativePath;
+    }
+
+    public static boolean isAlwaysVisibleEmulatedStoragePath(String path, int userId) {
+        final String relativePath = getAlwaysVisibleEmulatedStorageRelativePath(path, userId);
+        if (relativePath == null) {
+            return false;
+        }
+        if (relativePath.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if {@code path} is a emulated storage top-level directory for a user
+     * or one of its default subdirectories. Returns {@code false} otherwise.
+     */
+    public static boolean isAlwaysVisiblePath(@Nullable String path, int userId) {
+        final String relativePath = getAlwaysVisibleEmulatedStorageRelativePath(path, userId);
+        if (relativePath == null) {
+            return false;
+        }
+        if (relativePath.isEmpty()) {
+            return true;
+        }
+        return isDefaultDirectoryName(relativePath);
+    }
+
+    public static void fillWithDefaultDirectoryEntries(List<String> entries) {
+        for (String defaultDirName : DEFAULT_FOLDER_NAMES) {
+            entries.add(defaultDirName);
+        }
     }
 }
