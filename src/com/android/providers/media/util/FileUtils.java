@@ -963,6 +963,9 @@ public class FileUtils {
     public static final boolean ENABLE_FUSE_DIRECTORY_PRIVACY =
             SystemProperties.getBoolean("persist.sys.fuse.directory_privacy", true);
 
+    public static final boolean ENABLE_FUSE_PROBE_PROTECTION =
+            SystemProperties.getBoolean("persist.sys.fuse.probe_protection", true);
+
     /**
      * Regex that matches paths in all well-known package-specific directories,
      * and which captures the package name as the first group.
@@ -1004,6 +1007,9 @@ public class FileUtils {
 
     private static final Pattern PATTERN_VISIBLE = Pattern.compile(
             "(?i)^/storage/[^/]+(?:/[0-9]+)?$");
+
+    private static final Pattern PATTERN_VISIBLE_RELATIVE_PATH_EXTRACTOR = Pattern.compile(
+            "(?i)^/storage/[^/]+(?:/[0-9]+)?(|/.*)$");
 
     private static final Pattern PATTERN_INVISIBLE = Pattern.compile(
             "(?i)^/storage/[^/]+(?:/[0-9]+)?/"
@@ -1876,6 +1882,29 @@ public class FileUtils {
     public static File canonicalize(@NonNull File file) throws IOException {
         Objects.requireNonNull(file);
         return file.getCanonicalFile();
+    }
+
+    /**
+     * @return {@code true} if {@code path} is a top-level storage directory or one of its default
+     * subdirectories, as these should remain "visible" for compatibility, even if their contents
+     * cannot necessarily be listed or read. Returns {@code false} otherwise.
+     */
+    public static boolean isAlwaysVisiblePath(@Nullable String path, int userId) {
+        if (path == null) {
+            return false;
+        }
+        final Matcher matcher = PATTERN_VISIBLE_RELATIVE_PATH_EXTRACTOR.matcher(path);
+        if (!matcher.matches()) {
+            return false;
+        }
+        final String relativePath = matcher.group(1);
+        if (relativePath == null || relativePath.isEmpty()) {
+            // This is a top-level storage directory.
+            return true;
+        }
+        // Will return true if this is an always-visible subdirectory.
+        return ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE
+                .contains(relativePath.substring(1).toLowerCase(Locale.ROOT));
     }
 
     public static boolean isAlwaysVisibleDirectoryName(final String lowercaseName) {
