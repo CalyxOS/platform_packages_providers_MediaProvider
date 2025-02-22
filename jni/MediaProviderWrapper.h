@@ -265,7 +265,7 @@ class MediaProviderWrapper final {
     jmethodID mid_on_file_open_;
     jmethodID mid_scan_file_;
     jmethodID mid_is_diraccess_allowed_;
-    jmethodID mid_get_files_in_dir_;
+    jmethodID mid_get_entries_in_dir_;
     jmethodID mid_rename_;
     jmethodID mid_is_uid_allowed_access_to_data_or_obb_path_;
     jmethodID mid_on_file_created_;
@@ -291,6 +291,9 @@ class MediaProviderWrapper final {
      * Auxiliary for caching MediaProvider methods.
      */
     jmethodID CacheMethod(JNIEnv* env, const char method_name[], const char signature[]);
+
+    void AddDirectoryEntries(DIR* dirp, const std::string& path, bool directoriesOnly,
+        std::vector<std::shared_ptr<DirectoryEntry>>* directory_entries, uid_t uid);
 
     // Attaches the current thread (if necessary) and returns the JNIEnv
     // associated with it.
