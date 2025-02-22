@@ -87,6 +87,7 @@ import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_RED
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_SELF;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_SHELL;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_IS_SYSTEM_GALLERY;
+import static com.android.providers.media.LocalCallingIdentity.PERMISSION_MANAGE_DOCUMENTS;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_MANAGE_MEDIA;
 import static com.android.providers.media.LocalCallingIdentity.PERMISSION_WRITE_EXTERNAL_STORAGE;
 import static com.android.providers.media.LocalUriMatcher.AUDIO_ALBUMART;
@@ -146,6 +147,8 @@ import static com.android.providers.media.scan.MediaScanner.REASON_DEMAND;
 import static com.android.providers.media.scan.MediaScanner.REASON_IDLE;
 import static com.android.providers.media.util.DatabaseUtils.bindList;
 import static com.android.providers.media.util.FileUtils.DEFAULT_FOLDER_NAMES;
+import static com.android.providers.media.util.FileUtils.ENABLE_FUSE_PREVENT_PERMISSIONLESS_WRITES;
+import static com.android.providers.media.util.FileUtils.ENABLE_FUSE_PROBE_PROTECTION;
 import static com.android.providers.media.util.FileUtils.PATTERN_PENDING_FILEPATH_FOR_SQL;
 import static com.android.providers.media.util.FileUtils.buildPrimaryVolumeFile;
 import static com.android.providers.media.util.FileUtils.extractDisplayName;
@@ -160,6 +163,7 @@ import static com.android.providers.media.util.FileUtils.extractVolumeName;
 import static com.android.providers.media.util.FileUtils.extractVolumePath;
 import static com.android.providers.media.util.FileUtils.fromFuseFile;
 import static com.android.providers.media.util.FileUtils.getAbsoluteSanitizedPath;
+import static com.android.providers.media.util.FileUtils.isAlwaysVisiblePath;
 import static com.android.providers.media.util.FileUtils.isCrossUserEnabled;
 import static com.android.providers.media.util.FileUtils.isDataOrObbPath;
 import static com.android.providers.media.util.FileUtils.isDataOrObbRelativePath;
@@ -167,9 +171,11 @@ import static com.android.providers.media.util.FileUtils.isDownload;
 import static com.android.providers.media.util.FileUtils.isExternalMediaDirectory;
 import static com.android.providers.media.util.FileUtils.isObbOrChildRelativePath;
 import static com.android.providers.media.util.FileUtils.sanitizePath;
+import static com.android.providers.media.util.FileUtils.shouldBeInvisible;
 import static com.android.providers.media.util.FileUtils.toFuseFile;
 import static com.android.providers.media.util.Logging.LOGV;
 import static com.android.providers.media.util.Logging.TAG;
+import static com.android.providers.media.util.Logging.logv;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionSelf;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionShell;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionSystem;
@@ -3030,28 +3036,14 @@ public class MediaProvider extends ContentProvider {
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
-
         try {
-            if (isPrivatePackagePathNotAccessibleByCaller(path)) {
-                return new String[] {""};
-            }
-
-            if (shouldBypassFuseRestrictions(/*forWrite*/ false, path)) {
-                return new String[] {"/"};
-            }
-
-            // Do not allow apps to list Android/data or Android/obb dirs.
-            // On primary volumes, apps that get special access to these directories get it via
-            // mount views of lowerfs. On secondary volumes, such apps would return early from
-            // shouldBypassFuseRestrictions above.
-            if (isDataOrObbPath(path)) {
-                return new String[] {""};
-            }
-
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
-                return new String[] {""};
+            final Boolean precheck = canCallerAccessPathPrecheck(path);
+            if (precheck != null) {
+                if (precheck.equals(Boolean.TRUE)) {
+                    return new String[] {"/"};
+                } else {
+                    return new String[] {""};
+                }
             }
 
             // Get relative path for the contents of given directory.
@@ -3094,6 +3086,44 @@ public class MediaProvider extends ContentProvider {
         } finally {
             restoreLocalCallingIdentity(token);
         }
+    }
+
+    /**
+     * @return {@code true} if the uid can access the path, {@code false} if it cannot,
+     * or {@code null} if further checks should continue.
+     */
+    private Boolean canCallerAccessPathPrecheck(String path) {
+        if (isPrivatePackagePathNotAccessibleByCaller(path)) {
+            logv("canCallerAccessPathPrecheck(" + path
+                    + "): isPrivatePackagePathNotAccessibleByCaller");
+            return Boolean.FALSE;
+        }
+
+        if (shouldBypassFuseRestrictions(/*forWrite*/ false, path)) {
+            logv("canCallerAccessPathPrecheck(" + path
+                    + "): shouldBypassFuseRestrictions");
+            return Boolean.TRUE;
+        }
+
+        // Do not allow apps to list Android/data or Android/obb dirs.
+        // On primary volumes, apps that get special access to these directories get it via
+        // mount views of lowerfs. On secondary volumes, such apps would return early from
+        // shouldBypassFuseRestrictions above.
+        if (isDataOrObbPath(path)) {
+            logv("canCallerAccessPathPrecheck(" + path + "): isDataOrObbPath");
+            return Boolean.FALSE;
+        }
+
+        // Legacy apps that made is this far don't have the right storage permission and hence
+        // are not allowed to access anything other than their external app directory
+        if (isCallingPackageRequestingLegacy()) {
+            logv("canCallerAccessPathPrecheck(" + path
+                    + "): isCallingPackageRequestingLegacy");
+            return Boolean.FALSE;
+        }
+
+        logv("canCallerAccessPathPrecheck(" + path + "): further checks needed");
+        return null;
     }
 
     /**
@@ -10660,7 +10690,9 @@ public class MediaProvider extends ContentProvider {
                     mediaCapabilitiesUid, new long[0]);
         } catch (IllegalStateException | SecurityException e) {
             Log.e(TAG, "Permission to access file: " + path + " is denied");
-            return new FileOpenResult(OsConstants.EACCES /* status */, originalUid,
+            final int errorConstant = ENABLE_FUSE_PROBE_PROTECTION ?
+                    OsConstants.ENOENT : OsConstants.EACCES;
+            return new FileOpenResult(errorConstant /* status */, originalUid,
                     mediaCapabilitiesUid, new long[0]);
         } finally {
             if (isSuccess && logTransformsMetrics) {
@@ -10806,6 +10838,36 @@ public class MediaProvider extends ContentProvider {
             if (item.equalsIgnoreCase(current)) return true;
         }
         return false;
+    }
+
+    private boolean fileExistsForCaller(@NonNull String absolutePath, int uid) {
+        // Copied from getEntriesInDirectoryForFuse.
+
+        // Getting UserId from the directory path, as clone user shares the MediaProvider
+        // of user 0.
+        int userIdFromPath = FileUtils.extractUserId(absolutePath);
+        // In some cases, like querying public volumes, userId is not available in path. We
+        // take userId from the user running MediaProvider process (sUserId).
+        if (userIdFromPath == -1) {
+            userIdFromPath = sUserId;
+        }
+
+        final String[] projection = {};
+        final String selection = FileColumns.DATA + "=? and " + FileColumns._USER_ID + "=?";
+        final String[] selectionArgs = {absolutePath, String.valueOf(userIdFromPath)};
+        final Uri uri = FileUtils.getContentUriForPath(absolutePath);
+        final boolean result;
+        try (final Cursor c = query(uri, projection, selection, selectionArgs, null)) {
+            // Shouldn't return null
+            result = c.getCount() > 0;
+        }
+
+        logv("fileExistsForCaller:"
+                + " uid=" + uid
+                + ", path=" + absolutePath
+                + ", result=" + result);
+
+        return result;
     }
 
     private boolean fileExists(@NonNull String absolutePath) {
@@ -11098,6 +11160,7 @@ public class MediaProvider extends ContentProvider {
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
+
         try {
             if ("/storage/emulated".equals(path)) {
                 return OsConstants.EPERM;
@@ -11153,13 +11216,95 @@ public class MediaProvider extends ContentProvider {
                     }
 
                     Log.e(TAG,
-                            "Creating or writing to a non-default top level directory is not "
+                            "Creating or writing to a non-default top level directory "
+                                    + (ENABLE_FUSE_PROBE_PROTECTION ? "or file " : "") + "is not "
                                     + "allowed!");
                     return OsConstants.EACCES;
                 }
             }
 
             return 0;
+        } finally {
+            restoreLocalCallingIdentity(token);
+        }
+    }
+
+    @Keep
+    public boolean isPathVisibleForFuse(String path, int uid, boolean forWrite) {
+        // Use MediaProviders UserId as the caller might be calling cross profile.
+        final LocalCallingIdentity token =
+                clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
+        try {
+            // Get relative path for the contents of given directory.
+            final String relativePath = extractRelativePathWithDisplayName(path);
+            if (relativePath == null || "/".equals(relativePath)) {
+                // Path is /storage/emulated/, if relativePath is null, MediaProvider doesn't
+                // have any details about the given directory. Use lower file system to obtain
+                // files and directories in the given directory.
+                // If relativePath is /, this is a root directory such as /storage/emulated/0.
+                // For legacy reasons, we don't want to hide such paths. Permission to list
+                // the contents may still ultimately be denied, but the path should be visible.
+                logv("isPathVisibleForFuse(" + uid + ", " + path + "): relativePath="
+                        + relativePath);
+                return true;
+            }
+
+            final Boolean precheck = canCallerAccessPathPrecheck(path);
+            logv("isPathVisibleForFuse(" + uid + ", " + path + "): precheck=" + precheck);
+            if (precheck != null) {
+                return precheck.booleanValue();
+            }
+            if (isCallingIdentityDocumentsManager()) {
+                logv("isPathVisibleForFuse(" + uid + ", " + path + "): documents manager");
+                return true;
+            }
+            if (isAlwaysVisiblePath(path, sUserId)) {
+                logv("isPathVisibleForFuse(" + uid + ", " + path + "): always-visible");
+                return true;
+            }
+            // Do not add additional blinders for paths like .thumbnails, as this breaks things,
+            // for example DocumentsProvider expects them or it "Can't load content at the moment".
+            // So, paradoxical as it sounds, a uid should be "allowed to see" these invisible paths.
+            if (shouldBeInvisible(path)) {
+                logv("isPathVisibleForFuse(" + uid + ", " + path + "): shouldBeInvisible");
+                return true;
+            }
+            String redactedUriId = null;
+            if (isSyntheticPath(path, sUserId) && isRedactedPath(path, sUserId)) {
+                redactedUriId = extractFileName(path);
+            }
+
+            // Copied from onFileOpenForFuse.
+            // FIXME: Does not support directories (including ones created by the caller):
+            // 'No item at content://...'
+            // This is probably because directories created in FUSE need to notify MediaProvider
+            // that they exist for this new system to work. This didn't happen before because all
+            // directories were loaded from the lower filesystem, but that's not secure or private.
+            // TODO: Fetch owner id from Android/media directory and check if caller is owner
+            FileAccessAttributes fileAttributes = null;
+            if (XAttrUtils.ENABLE_XATTR_METADATA_FOR_FUSE) {
+                Optional<FileAccessAttributes> fileAttributesThroughXattr =
+                        XAttrUtils.getFileAttributesFromXAttr(path,
+                                XAttrUtils.FILE_ACCESS_XATTR_KEY);
+                if (fileAttributesThroughXattr.isPresent()) {
+                    fileAttributes = fileAttributesThroughXattr.get();
+                }
+            }
+
+            // FileAttributes will be null if the xattr call failed or the flag to enable xattr
+            // metadata support is not set
+            try {
+                if (fileAttributes == null) {
+                    fileAttributes = queryForFileAttributes(path);
+                }
+                checkIfFileOpenIsPermitted(path, fileAttributes, redactedUriId, forWrite);
+            } catch (IOException | SecurityException e) {
+                logv("isPathVisibleForFuse(" + uid + ", " + path + "): false", e);
+                return false;
+            }
+
+            logv("isPathVisibleForFuse(" + uid + ", " + path + "): true");
+            return true;
         } finally {
             restoreLocalCallingIdentity(token);
         }
@@ -11261,6 +11406,10 @@ public class MediaProvider extends ContentProvider {
         return mCallingIdentity.get().hasPermission(PERMISSION_ACCESS_MTP);
     }
 
+    private boolean isCallingIdentityDocumentsManager() {
+        return mCallingIdentity.get().hasPermission(PERMISSION_MANAGE_DOCUMENTS);
+    }
+
     /**
      * The following apps have access to all private-app directories on secondary volumes:
      *    * ExternalStorageProvider
@@ -11332,6 +11481,7 @@ public class MediaProvider extends ContentProvider {
             case DOWNLOADS_ID:
                 final long id = ContentUris.parseId(uri);
                 if (mCallingIdentity.get().isOwned(id)) {
+                    logv("Caller owns " + uri);
                     return true;
                 }
                 break;
@@ -11351,6 +11501,7 @@ public class MediaProvider extends ContentProvider {
             case AUDIO_ARTISTS:
             case AUDIO_GENRES:
             case AUDIO_PLAYLISTS:
+                logv("Disallowed table for " + uri);
                 return false;
             default:
                 // continue below
@@ -11379,6 +11530,8 @@ public class MediaProvider extends ContentProvider {
                 : Intent.FLAG_GRANT_READ_URI_PERMISSION;
         int uriPermission = getContext().checkUriPermission(uri, mCallingIdentity.get().pid,
                 mCallingIdentity.get().uid, modeFlags);
+        logv("Caller permission " + uriPermission + " for "
+                + (forWrite ? "write":"read") + " of " + uri);
         return uriPermission == PERMISSION_GRANTED;
     }
 
