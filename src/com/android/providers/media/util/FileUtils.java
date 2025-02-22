@@ -89,6 +89,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -96,6 +97,7 @@ import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class FileUtils {
     // Even though vfat allows 255 UCS-2 chars, we might eventually write to
@@ -958,6 +960,12 @@ public class FileUtils {
     private static final String PROP_CROSS_USER_ROOT_PATTERN = ((PROP_CROSS_USER_ROOT.isEmpty())
             ? "" : "(?:" + PROP_CROSS_USER_ROOT + "/)?");
 
+    public static final boolean ENABLE_FUSE_PROBE_PROTECTION =
+            SystemProperties.getBoolean("persist.sys.fuse.probe_protection", true);
+
+    public static final boolean ENABLE_FUSE_PREVENT_PERMISSIONLESS_WRITES =
+            SystemProperties.getBoolean("persist.sys.fuse.prevent_permissionless_writes", true);
+
     /**
      * Regex that matches paths in all well-known package-specific directories,
      * and which captures the package name as the first group.
@@ -999,6 +1007,9 @@ public class FileUtils {
 
     private static final Pattern PATTERN_VISIBLE = Pattern.compile(
             "(?i)^/storage/[^/]+(?:/[0-9]+)?$");
+
+    private static final Pattern PATTERN_VISIBLE_RELATIVE_PATH_EXTRACTOR = Pattern.compile(
+            "(?i)^/storage/[^/]+(?:/[0-9]+)?(|/.*)$");
 
     private static final Pattern PATTERN_INVISIBLE = Pattern.compile(
             "(?i)^/storage/[^/]+(?:/[0-9]+)?/"
@@ -1048,6 +1059,12 @@ public class FileUtils {
             };
         }
     }
+
+    private static final List<String> ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE =
+            Stream.concat(
+                    Arrays.stream(DEFAULT_FOLDER_NAMES),
+                    Stream.of("Android")
+            ).sorted().map(s -> s.toLowerCase(Locale.ROOT)).distinct().toList();
 
     /**
      * Regex that matches paths for {@link MediaColumns#RELATIVE_PATH}
@@ -1861,5 +1878,28 @@ public class FileUtils {
     public static File canonicalize(@NonNull File file) throws IOException {
         Objects.requireNonNull(file);
         return file.getCanonicalFile();
+    }
+
+    /**
+     * @return {@code true} if {@code path} is a top-level storage directory or one of its default
+     * subdirectories, as these should remain "visible" for compatibility, even if their contents
+     * cannot necessarily be listed or read. Returns {@code false} otherwise.
+     */
+    public static boolean isAlwaysVisiblePath(@Nullable String path, int userId) {
+        if (path == null) {
+            return false;
+        }
+        final Matcher matcher = PATTERN_VISIBLE_RELATIVE_PATH_EXTRACTOR.matcher(path);
+        if (!matcher.matches()) {
+            return false;
+        }
+        final String relativePath = matcher.group(1);
+        if (relativePath == null || relativePath.isEmpty()) {
+            // This is a top-level storage directory.
+            return true;
+        }
+        // Will return true if this is an always-visible subdirectory.
+        return ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE
+                .contains(relativePath.substring(1).toLowerCase(Locale.ROOT));
     }
 }
