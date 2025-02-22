@@ -146,6 +146,7 @@ import static com.android.providers.media.scan.MediaScanner.REASON_DEMAND;
 import static com.android.providers.media.scan.MediaScanner.REASON_IDLE;
 import static com.android.providers.media.util.DatabaseUtils.bindList;
 import static com.android.providers.media.util.FileUtils.DEFAULT_FOLDER_NAMES;
+import static com.android.providers.media.util.FileUtils.ENABLE_FUSE_DIRECTORY_PRIVACY;
 import static com.android.providers.media.util.FileUtils.PATTERN_PENDING_FILEPATH_FOR_SQL;
 import static com.android.providers.media.util.FileUtils.buildPrimaryVolumeFile;
 import static com.android.providers.media.util.FileUtils.extractDisplayName;
@@ -3027,7 +3028,7 @@ public class MediaProvider extends ContentProvider {
      * Called from JNI in jni/MediaProviderWrapper.cpp
      */
     @Keep
-    public String[] getFilesInDirectoryForFuse(String path, int uid) {
+    public String[] getEntriesInDirectoryForFuse(String path, int uid) {
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
@@ -3080,7 +3081,8 @@ public class MediaProvider extends ContentProvider {
 
             Bundle queryArgs = new Bundle();
             queryArgs.putString(QUERY_ARG_SQL_SELECTION, MediaColumns.RELATIVE_PATH +
-                    " =? and " + FileColumns._USER_ID + " =? and mime_type not like 'null'");
+                    " =? and " + FileColumns._USER_ID + " =?"
+                    + (ENABLE_FUSE_DIRECTORY_PRIVACY ? "" : " and mime_type not like 'null'"));
             queryArgs.putStringArray(QUERY_ARG_SQL_SELECTION_ARGS, new String[] {relativePath,
                     String.valueOf(userIdFromPath)});
             // Get database entries for files from MediaProvider database with
