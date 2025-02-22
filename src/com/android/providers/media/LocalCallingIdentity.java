@@ -26,6 +26,7 @@ import static com.android.providers.media.util.PermissionUtils.checkPermissionAc
 import static com.android.providers.media.util.PermissionUtils.checkPermissionAccessOemMetadata;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionDelegator;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionInstallPackages;
+import static com.android.providers.media.util.PermissionUtils.checkPermissionManageDocuments;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionManageMedia;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionManager;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionQueryAllPackages;
@@ -358,10 +359,12 @@ public class LocalCallingIdentity {
 
     public static final int PERMISSION_MANAGE_MEDIA = 1 << 31;
 
-    private volatile int hasPermission;
-    private volatile int hasPermissionResolved;
+    public static final long PERMISSION_MANAGE_DOCUMENTS = 1L << 32;
 
-    public boolean hasPermission(int permission) {
+    private volatile long hasPermission;
+    private volatile long hasPermissionResolved;
+
+    public boolean hasPermission(long permission) {
         if ((hasPermissionResolved & permission) == 0) {
             if (hasPermissionInternal(permission)) {
                 hasPermission |= permission;
@@ -371,7 +374,7 @@ public class LocalCallingIdentity {
         return (hasPermission & permission) != 0;
     }
 
-    private boolean hasPermissionInternal(int permission) {
+    private boolean hasPermissionInternal(long permission) {
         boolean targetSdkIsAtLeastT = getTargetSdkVersion() > Build.VERSION_CODES.S_V2;
         if (StrictLocationRedactionHelper.getInstance(context).isSettingEnabled()) {
             // We lie about target SDK because lower SDK should not be rewarded with access
@@ -385,7 +388,15 @@ public class LocalCallingIdentity {
                     "Shell user cannot access files for user " + UserHandle.myUserId());
         }
 
-        switch (permission) {
+        // Use `if` instead of `switch` as a hacky workaround to accommodate a greater number of
+        // permission flags than this design supports, without needing to rewrite all these lines.
+        if (permission == PERMISSION_MANAGE_DOCUMENTS) {
+            return checkPermissionManageDocuments(context, pid, uid, getPackageName(),
+                    attributionTag);
+        } else if (permission > Integer.MAX_VALUE || permission < Integer.MIN_VALUE) {
+            return false;
+        }
+        switch ((int)permission) {
             case PERMISSION_IS_SELF:
                 return checkPermissionSelf(context, pid, uid);
             case PERMISSION_IS_SHELL:
