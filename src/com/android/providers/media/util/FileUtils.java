@@ -958,6 +958,9 @@ public class FileUtils {
     private static final String PROP_CROSS_USER_ROOT_PATTERN = ((PROP_CROSS_USER_ROOT.isEmpty())
             ? "" : "(?:" + PROP_CROSS_USER_ROOT + "/)?");
 
+    public static final boolean ENABLE_FUSE_DIRECTORY_PRIVACY =
+            SystemProperties.getBoolean("persist.sys.fuse.directory_privacy", true);
+
     /**
      * Regex that matches paths in all well-known package-specific directories,
      * and which captures the package name as the first group.
