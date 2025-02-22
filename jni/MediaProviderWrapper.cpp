@@ -111,6 +111,19 @@ int isDirAccessAllowedInternal(JNIEnv* env, jobject media_provider_object,
     return res;
 }
 
+bool isPathVisibleInternal(JNIEnv* env, jobject media_provider_object,
+                           jmethodID mid_is_path_visible_, const string& path, uid_t uid,
+                           bool forWrite) {
+    ScopedLocalRef<jstring> j_path(env, env->NewStringUTF(path.c_str()));
+    bool res = env->CallBooleanMethod(media_provider_object, mid_is_path_visible_, j_path.get(),
+                                      uid, forWrite);
+
+    if (CheckForJniException(env)) {
+        return false;
+    }
+    return res;
+}
+
 bool isUidAllowedAccessToDataOrObbPathInternal(JNIEnv* env, jobject media_provider_object,
                                                jmethodID mid_is_uid_allowed_path_access_, uid_t uid,
                                                const string& path) {
@@ -241,6 +254,8 @@ MediaProviderWrapper::MediaProviderWrapper(JNIEnv* env, jobject media_provider) 
     mid_get_files_in_dir_ =
             CacheMethod(env, "getFilesInDirectory", "(Ljava/lang/String;I)[Ljava/lang/String;");
     mid_rename_ = CacheMethod(env, "rename", "(Ljava/lang/String;Ljava/lang/String;I)I");
+    mid_is_path_visible_ =
+            CacheMethod(env, "isPathVisible", "(Ljava/lang/String;IZ)Z");
     mid_is_uid_allowed_access_to_data_or_obb_path_ =
             CacheMethod(env, "isUidAllowedAccessToDataOrObbPath", "(ILjava/lang/String;)Z");
     mid_on_file_created_ = CacheMethod(env, "onFileCreated", "(Ljava/lang/String;)V");
@@ -429,6 +444,16 @@ int MediaProviderWrapper::IsOpendirAllowed(const string& path, uid_t uid, bool f
     return isDirAccessAllowedInternal(env, media_provider_object_, mid_is_diraccess_allowed_, path,
                                       uid,
                                       forWrite ? kWriteDirectoryRequest : kReadDirectoryRequest);
+}
+
+bool MediaProviderWrapper::IsPathVisible(const string& path, uid_t uid, bool forWrite) {
+    if (shouldBypassMediaProvider(uid)) {
+        return true;
+    }
+
+    JNIEnv* env = MaybeAttachCurrentThread();
+    return isPathVisibleInternal(
+            env, media_provider_object_, mid_is_path_visible_, path, uid, forWrite);
 }
 
 bool MediaProviderWrapper::isUidAllowedAccessToDataOrObbPath(uid_t uid, const string& path) {
