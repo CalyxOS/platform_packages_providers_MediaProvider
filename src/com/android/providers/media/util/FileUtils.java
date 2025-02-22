@@ -1987,6 +1987,24 @@ public class FileUtils {
     }
 
     /**
+     * @return {@code true} if {@code path} is an emulated storage top-level directory for a user -
+     * either the provided user or user 0 - or one of its default subdirectories, as these should
+     * remain "visible" for compatibility, even if their contents cannot necessarily be listed or
+     * read. Returns {@code false} otherwise.
+     */
+    public static boolean isAlwaysVisiblePath(@Nullable String path, int userId) {
+        final String relativePath = getAlwaysVisibleEmulatedStorageRelativePath(path, userId);
+        if (relativePath == null) {
+            return false;
+        }
+        if (relativePath.isEmpty()) {
+            return true;
+        }
+        return ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE
+                .contains(relativePath.toLowerCase(Locale.ROOT));
+    }
+
+    /**
      * Fill a list with the standard always-visible directory entries that are expected for
      * emulated storage, e.g. Android, DCIM, Music, etc. If an item is already present in the
      * provided list, it will not be added again. This check is performed case-insensitively,
