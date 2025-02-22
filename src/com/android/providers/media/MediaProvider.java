@@ -158,8 +158,10 @@ import static com.android.providers.media.util.FileUtils.extractRelativePathWith
 import static com.android.providers.media.util.FileUtils.extractTopLevelDir;
 import static com.android.providers.media.util.FileUtils.extractVolumeName;
 import static com.android.providers.media.util.FileUtils.extractVolumePath;
+import static com.android.providers.media.util.FileUtils.fillWithAlwaysVisibleStorageDirectoryEntries;
 import static com.android.providers.media.util.FileUtils.fromFuseFile;
 import static com.android.providers.media.util.FileUtils.getAbsoluteSanitizedPath;
+import static com.android.providers.media.util.FileUtils.isAlwaysVisibleDirectoryName;
 import static com.android.providers.media.util.FileUtils.isCrossUserEnabled;
 import static com.android.providers.media.util.FileUtils.isDataOrObbPath;
 import static com.android.providers.media.util.FileUtils.isDataOrObbRelativePath;
@@ -167,6 +169,7 @@ import static com.android.providers.media.util.FileUtils.isDownload;
 import static com.android.providers.media.util.FileUtils.isExternalMediaDirectory;
 import static com.android.providers.media.util.FileUtils.isObbOrChildRelativePath;
 import static com.android.providers.media.util.FileUtils.sanitizePath;
+import static com.android.providers.media.util.FileUtils.shouldBeVisible;
 import static com.android.providers.media.util.FileUtils.toFuseFile;
 import static com.android.providers.media.util.Logging.LOGV;
 import static com.android.providers.media.util.Logging.TAG;
@@ -3084,11 +3087,22 @@ public class MediaProvider extends ContentProvider {
                     String.valueOf(userIdFromPath)});
             // Get database entries for files from MediaProvider database with
             // MediaColumns.RELATIVE_PATH as the given path.
+            final boolean isTopLevelStorage = shouldBeVisible(path);
             try (final Cursor cursor = query(FileUtils.getContentUriForPath(path), projection,
                     queryArgs, null)) {
                 while(cursor.moveToNext()) {
-                    fileNamesList.add(extractDisplayName(cursor.getString(0)));
+                    final String fileName = extractDisplayName(cursor.getString(0));
+                    if (isTopLevelStorage && fileName != null &&
+                            isAlwaysVisibleDirectoryName(fileName.toLowerCase(Locale.ROOT))) {
+                        // Filter out any always-visible directory names for top-level storage,
+                        // as we will be adding them later and don't want duplicates.
+                        continue;
+                    }
+                    fileNamesList.add(fileName);
                 }
+            }
+            if (isTopLevelStorage) {
+                fillWithAlwaysVisibleStorageDirectoryEntries(fileNamesList);
             }
             return fileNamesList.toArray(new String[fileNamesList.size()]);
         } finally {
