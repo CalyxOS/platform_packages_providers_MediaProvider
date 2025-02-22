@@ -158,6 +158,7 @@ import static com.android.providers.media.util.FileUtils.extractRelativePathWith
 import static com.android.providers.media.util.FileUtils.extractTopLevelDir;
 import static com.android.providers.media.util.FileUtils.extractVolumeName;
 import static com.android.providers.media.util.FileUtils.extractVolumePath;
+import static com.android.providers.media.util.FileUtils.fillWithAlwaysVisibleStorageDirectoryEntries;
 import static com.android.providers.media.util.FileUtils.fromFuseFile;
 import static com.android.providers.media.util.FileUtils.getAbsoluteSanitizedPath;
 import static com.android.providers.media.util.FileUtils.isCrossUserEnabled;
@@ -167,6 +168,7 @@ import static com.android.providers.media.util.FileUtils.isDownload;
 import static com.android.providers.media.util.FileUtils.isExternalMediaDirectory;
 import static com.android.providers.media.util.FileUtils.isObbOrChildRelativePath;
 import static com.android.providers.media.util.FileUtils.sanitizePath;
+import static com.android.providers.media.util.FileUtils.shouldBeVisible;
 import static com.android.providers.media.util.FileUtils.toFuseFile;
 import static com.android.providers.media.util.Logging.LOGV;
 import static com.android.providers.media.util.Logging.TAG;
@@ -3090,9 +3092,16 @@ public class MediaProvider extends ContentProvider {
                     fileNamesList.add(extractDisplayName(cursor.getString(0)));
                 }
             }
+            maybeFillWithAlwaysVisibleDirectoryEntries(path, fileNamesList);
             return fileNamesList.toArray(new String[fileNamesList.size()]);
         } finally {
             restoreLocalCallingIdentity(token);
+        }
+    }
+
+    void maybeFillWithAlwaysVisibleDirectoryEntries(String path, List<String> fileNamesList) {
+        if (shouldBeVisible(path)) {
+            fillWithAlwaysVisibleStorageDirectoryEntries(fileNamesList);
         }
     }
 

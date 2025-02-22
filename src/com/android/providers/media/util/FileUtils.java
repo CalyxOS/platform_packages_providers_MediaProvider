@@ -89,6 +89,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -96,6 +97,7 @@ import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class FileUtils {
     // Even though vfat allows 255 UCS-2 chars, we might eventually write to
@@ -1049,6 +1051,16 @@ public class FileUtils {
         }
     }
 
+    private static final List<String> ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES =
+            Stream.concat(
+                    Arrays.stream(DEFAULT_FOLDER_NAMES),
+                    Stream.of("Android")
+            ).sorted().distinct().toList();
+
+    private static final List<String> ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE =
+            ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES
+                    .stream().map(s -> s.toLowerCase(Locale.ROOT)).toList();
+
     /**
      * Regex that matches paths for {@link MediaColumns#RELATIVE_PATH}
      */
@@ -1861,5 +1873,26 @@ public class FileUtils {
     public static File canonicalize(@NonNull File file) throws IOException {
         Objects.requireNonNull(file);
         return file.getCanonicalFile();
+    }
+
+    /**
+     * Fill a list with the standard always-visible directory entries that are expected in
+     * storage paths, e.g. Android, DCIM, Music, etc. If an item is already present in the
+     * provided list, it will not be added again. This check is performed case-insensitively,
+     * so if "movies" is already in the list, "Movies" will not be added.
+     *
+     * @param entries An existing list, which may or may not be empty, of directory entry names.
+     */
+    public static void fillWithAlwaysVisibleStorageDirectoryEntries(
+            @NonNull List<String> entries) {
+        final List<String> lowercaseEntries = entries.stream().map(s -> s.toLowerCase(Locale.ROOT))
+                .toList();
+        for (int i = 0; i < ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES.size(); i++) {
+            final String desiredLowercaseEntry =
+                    ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE.get(i);
+            if (!lowercaseEntries.contains(desiredLowercaseEntry)) {
+                entries.add(ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES.get(i));
+            }
+        }
     }
 }
