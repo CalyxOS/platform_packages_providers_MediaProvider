@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce205085_7c96e2f2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-22T03:05:53Z",
+      "side": 1,
+      "message": "Does not address the \"probe files\" issue. Any file can still be `ls`\u0027d or `stat`\u0027d. Can fix that in a follow-up, but it\u0027s important, too.\n\nAlso should test this a lot more, of course.",
+      "revId": "6765d1f3e256de82519466999f7d3def0926eeb4",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
