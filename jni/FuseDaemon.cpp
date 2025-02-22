@@ -947,6 +947,11 @@ static bool is_app_accessible_path(struct fuse* fuse, const string& path, uid_t 
             return false;
         }
     }
+
+    if (!mp->isUidAllowedToSeePath(uid, path)) {
+        PLOG(DEBUG) << "uid " << uid << " is not allowed to see path: " << path;
+        return false;
+    }
     return true;
 }
 
@@ -1023,17 +1028,21 @@ static node* do_lookup(fuse_req_t req, fuse_ino_t parent, const char* name,
     }
     string parent_path = parent_node->BuildPath();
 
+    const string child_path = parent_path + "/" + name;
+
     // We should always allow lookups on the root, because failing them could cause
     // bind mounts to be invalidated.
-    if (validate_access && !fuse->IsRoot(parent_node) &&
-        !is_app_accessible_path(fuse, parent_path, req->ctx.uid)) {
-        *error_code = ENOENT;
-        return nullptr;
+    if (validate_access && !fuse->IsRoot(parent_node)) {
+        if (!is_app_accessible_path(fuse, parent_path, req->ctx.uid) ||
+            !is_app_accessible_path(fuse, child_path, req->ctx.uid)) {
+            PLOG(DEBUG) << "do_lookup: app inaccessible path from uid "
+                        << req->ctx.uid << ": " << child_path;
+            *error_code = ENOENT;
+            return nullptr;
+        }
     }
 
     TRACE_NODE(parent_node, req);
-
-    const string child_path = parent_path + "/" + name;
 
     if (validate_access && !is_user_accessible_path(req, fuse, child_path)) {
         *error_code = EACCES;
