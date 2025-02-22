@@ -105,7 +105,7 @@ public class MediaProviderForFuseTest {
         // We can create our file
         Truth.assertThat(sMediaProvider.insertFileIfNecessaryForFuse(
                 file.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 sTestDir.getPath(), sTestUid))).contains(file.getName());
 
         // Touch on disk so we can rename below
@@ -131,15 +131,15 @@ public class MediaProviderForFuseTest {
         final File renamed = new File(targetDir, "renamed" + System.nanoTime() + ".jpg");
         Truth.assertThat(sMediaProvider.renameForFuse(
                 file.getPath(), renamed.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 sTestDir.getPath(), sTestUid))).doesNotContain(file.getName());
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 targetDir.getPath(), sTestUid))).contains(renamed.getName());
 
         // And we can delete it
         Truth.assertThat(sMediaProvider.deleteFileForFuse(
                 renamed.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 targetDir.getPath(), sTestUid))).doesNotContain(renamed.getName());
     }
 
@@ -150,7 +150,7 @@ public class MediaProviderForFuseTest {
         // We can create our file
         Truth.assertThat(sMediaProvider.insertFileIfNecessaryForFuse(
                 file.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 sTestDir.getPath(), sTestUid))).contains(file.getName());
 
         // Touch on disk so we can rename below
@@ -170,15 +170,15 @@ public class MediaProviderForFuseTest {
         final File renamed = new File(sTestDir, "renamed" + System.nanoTime() + ".jpg");
         Truth.assertThat(sMediaProvider.renameForFuse(
                 file.getPath(), renamed.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 sTestDir.getPath(), sTestUid))).doesNotContain(file.getName());
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 sTestDir.getPath(), sTestUid))).contains(renamed.getName());
 
         // And we can delete it
         Truth.assertThat(sMediaProvider.deleteFileForFuse(
                 renamed.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 sTestDir.getPath(), sTestUid))).doesNotContain(renamed.getName());
     }
 
@@ -191,7 +191,7 @@ public class MediaProviderForFuseTest {
         final File renamedDir = new File(sTestDir, "renamed" + System.nanoTime());
         Truth.assertThat(sMediaProvider.renameForFuse(
                 oldDir.getPath(), renamedDir.getPath(), sTestUid)).isEqualTo(0);
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 renamedDir.getPath(), sTestUid))).contains(file.getName());
 
         // Querying renamed dir shows the file inside
@@ -218,7 +218,7 @@ public class MediaProviderForFuseTest {
                 oldDir.getPath(), renamedDir.getPath(), sTestUid)).isEqualTo(0);
 
         // Files should be in renamed dir.
-        Truth.assertThat(Arrays.asList(sMediaProvider.getFilesInDirectoryForFuse(
+        Truth.assertThat(Arrays.asList(sMediaProvider.getEntriesInDirectoryForFuse(
                 renamedDir.getPath(), sTestUid))).contains(file.getName());
 
         // Querying renamed dir doesn't show the file inside (because parent is hidden)
