@@ -158,8 +158,10 @@ import static com.android.providers.media.util.FileUtils.extractRelativePathWith
 import static com.android.providers.media.util.FileUtils.extractTopLevelDir;
 import static com.android.providers.media.util.FileUtils.extractVolumeName;
 import static com.android.providers.media.util.FileUtils.extractVolumePath;
+import static com.android.providers.media.util.FileUtils.fillWithAlwaysVisibleEmulatedStorageDirectoryEntries;
 import static com.android.providers.media.util.FileUtils.fromFuseFile;
 import static com.android.providers.media.util.FileUtils.getAbsoluteSanitizedPath;
+import static com.android.providers.media.util.FileUtils.isAlwaysVisibleEmulatedStoragePath;
 import static com.android.providers.media.util.FileUtils.isCrossUserEnabled;
 import static com.android.providers.media.util.FileUtils.isDataOrObbPath;
 import static com.android.providers.media.util.FileUtils.isDataOrObbRelativePath;
@@ -3090,10 +3092,18 @@ public class MediaProvider extends ContentProvider {
                     fileNamesList.add(extractDisplayName(cursor.getString(0)));
                 }
             }
+            maybeFillWithAlwaysVisibleDirectoryEntries(path, fileNamesList);
             return fileNamesList.toArray(new String[fileNamesList.size()]);
         } finally {
             restoreLocalCallingIdentity(token);
         }
+    }
+
+    void maybeFillWithAlwaysVisibleDirectoryEntries(String path, List<String> fileNamesList) {
+        if (!isAlwaysVisibleEmulatedStoragePath(path, sUserId)) {
+            return;
+        }
+        fillWithAlwaysVisibleEmulatedStorageDirectoryEntries(fileNamesList);
     }
 
     /**
