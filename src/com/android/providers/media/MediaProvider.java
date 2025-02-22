@@ -3026,7 +3026,7 @@ public class MediaProvider extends ContentProvider {
      * Called from JNI in jni/MediaProviderWrapper.cpp
      */
     @Keep
-    public String[] getFilesInDirectoryForFuse(String path, int uid) {
+    public String[] getEntriesInDirectoryForFuse(String path, int uid) {
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
@@ -3079,7 +3079,7 @@ public class MediaProvider extends ContentProvider {
 
             Bundle queryArgs = new Bundle();
             queryArgs.putString(QUERY_ARG_SQL_SELECTION, MediaColumns.RELATIVE_PATH +
-                    " =? and " + FileColumns._USER_ID + " =? and mime_type not like 'null'");
+                    " =? and " + FileColumns._USER_ID + " =?");
             queryArgs.putStringArray(QUERY_ARG_SQL_SELECTION_ARGS, new String[] {relativePath,
                     String.valueOf(userIdFromPath)});
             // Get database entries for files from MediaProvider database with
