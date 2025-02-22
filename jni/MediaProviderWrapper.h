@@ -188,6 +188,18 @@ class MediaProviderWrapper final {
     int IsOpendirAllowed(const std::string& path, uid_t uid, bool forWrite);
 
     /**
+     * Determines if a path is visible to a uid based on one of the following conditions:
+     * 1. The path appears to exist when querying the media provider database for it, as that uid.
+     * 2. The path is a special path that is always visible for compatibility reasons, such as
+     *    /storage/emulated/0 or its default subdirectories like Download, Music, etc.
+     *
+     * @param uid UID of the app
+     * @param path the path that the UID wants to access
+     * @return true if it matches, otherwise return false.
+     */
+    bool isUidAllowedToSeePath(uid_t uid, const std::string& path);
+
+    /**
      * Determines if one of the follows is true:
      * 1. The package name of the given private path matches the given uid,
           then this uid has access to private-app directories for this package.
@@ -267,6 +279,7 @@ class MediaProviderWrapper final {
     jmethodID mid_is_diraccess_allowed_;
     jmethodID mid_get_entries_in_dir_;
     jmethodID mid_rename_;
+    jmethodID mid_is_uid_allowed_to_see_path_;
     jmethodID mid_is_uid_allowed_access_to_data_or_obb_path_;
     jmethodID mid_on_file_created_;
     jmethodID mid_should_allow_lookup_;
