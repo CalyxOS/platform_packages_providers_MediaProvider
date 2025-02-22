@@ -2965,7 +2965,7 @@ public class MediaProvider extends ContentProvider {
      * Called from JNI in jni/MediaProviderWrapper.cpp
      */
     @Keep
-    public String[] getFilesInDirectoryForFuse(String path, int uid) {
+    public String[] getEntriesInDirectoryForFuse(String path, int uid) {
         final String originalPath = path;
         path = maybeRemoveIgnorableCodepoints(path);
         final LocalCallingIdentity token =
@@ -3019,7 +3019,7 @@ public class MediaProvider extends ContentProvider {
 
             Bundle queryArgs = new Bundle();
             queryArgs.putString(QUERY_ARG_SQL_SELECTION, MediaColumns.RELATIVE_PATH +
-                    " =? and " + FileColumns._USER_ID + " =? and mime_type not like 'null'");
+                    " =? and " + FileColumns._USER_ID + " =?");
             queryArgs.putStringArray(QUERY_ARG_SQL_SELECTION_ARGS, new String[] {relativePath,
                     String.valueOf(userIdFromPath)});
             // Get database entries for files from MediaProvider database with
@@ -10310,6 +10310,7 @@ public class MediaProvider extends ContentProvider {
     @Keep
     public FileOpenResult onFileOpenForFuse(String path, String ioPath, int uid, int tid,
             int transformsReason, boolean forWrite, boolean redact, boolean logTransformsMetrics) {
+        Log.i(TAG, "onFileOpenForFuse: uid=" + uid + ", forWrite=" + forWrite + ", path=" + path);
         final String originalPath = path;
         path = maybeRemoveIgnorableCodepoints(path);
         ioPath = maybeRemoveIgnorableCodepoints(ioPath);
