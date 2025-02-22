@@ -21,8 +21,13 @@
 #include <string>
 #include <vector>
 
+#include <android-base/properties.h>
+
 namespace mediaprovider {
 namespace fuse {
+
+static const bool ENABLE_FUSE_DIRECTORY_PRIVACY = android::base::GetBoolProperty(
+        "persist.sys.fuse.directory_privacy", true);
 
 /**
  * Holds a directory entry.
