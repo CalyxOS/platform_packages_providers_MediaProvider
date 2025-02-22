@@ -271,7 +271,7 @@ struct fuse {
           uncached_mode(_uncached_mode),
           mp(0),
           zero_addr(0),
-          disable_dentry_cache(false),
+          disable_dentry_cache(mediaprovider::fuse::ENABLE_FUSE_PROBE_PROTECTION),
           passthrough(false),
           upstream_passthrough(false),
           bpf(_bpf),
@@ -418,6 +418,18 @@ struct OpenInfo {
 };
 
 enum class FuseOp { lookup, readdir, mknod, mkdir, create };
+
+static inline bool op_is_write(const FuseOp op) {
+    switch (op) {
+        case FuseOp::mknod:
+        case FuseOp::mkdir:
+        case FuseOp::create:
+            return true;
+        case FuseOp::lookup:
+        case FuseOp::readdir:
+            return false;
+    }
+}
 
 static inline string get_name(node* n) {
     if (n) {
@@ -578,6 +590,12 @@ static std::unique_ptr<mediaprovider::fuse::FileLookupResult> validate_node_path
         return nullptr;
     }
     const struct fuse_ctx* ctx = fuse_req_ctx(req);
+    if (mediaprovider::fuse::ENABLE_FUSE_PROBE_PROTECTION
+            && !fuse->mp->IsPathVisible(path, ctx->uid, op_is_write(op))) {
+        PLOG(DEBUG) << "uid " << ctx->uid << " is not allowed to see path: " << path;
+        *error_code = ENOENT;
+        return nullptr;
+    }
     memset(e, 0, sizeof(*e));
 
     const bool synthetic_path = is_synthetic_path(path, fuse);
@@ -948,17 +966,23 @@ static node* do_lookup(fuse_req_t req, fuse_ino_t parent, const char* name,
     }
     string parent_path = parent_node->BuildPath();
 
+    const string child_path = parent_path + "/" + name;
+
     // We should always allow lookups on the root, because failing them could cause
     // bind mounts to be invalidated.
-    if (validate_access && !fuse->IsRoot(parent_node) &&
-        !is_app_accessible_path(fuse, parent_path, req->ctx.uid)) {
-        *error_code = ENOENT;
-        return nullptr;
+    if (validate_access && !fuse->IsRoot(parent_node)) {
+        const bool inaccessible_path = !is_app_accessible_path(fuse, parent_path, req->ctx.uid) ||
+                (mediaprovider::fuse::ENABLE_FUSE_PROBE_PROTECTION &&
+                 !is_app_accessible_path(fuse, child_path, req->ctx.uid));
+        if (inaccessible_path) {
+            PLOG(DEBUG) << "do_lookup: app inaccessible path from uid "
+                        << req->ctx.uid << ": " << child_path;
+            *error_code = ENOENT;
+            return nullptr;
+        }
     }
 
     TRACE_NODE(parent_node, req);
-
-    const string child_path = parent_path + "/" + name;
 
     if (validate_access && !is_user_accessible_path(req, fuse, child_path)) {
         *error_code = EACCES;
@@ -2222,6 +2246,20 @@ static void pf_access(fuse_req_t req, fuse_ino_t ino, int mask) {
             return;
         }
         status = fuse->mp->IsOpendirAllowed(path, req->ctx.uid, for_write);
+    } else if (mediaprovider::fuse::ENABLE_FUSE_PROBE_PROTECTION) {
+        std::unique_ptr<FileOpenResult> result = fuse->mp->OnFileOpen(
+                path, path, req->ctx.uid, req->ctx.pid, node->GetTransformsReason(), for_write,
+                false /* redact */, false /* log_transforms_metrics */);
+        if (!result) {
+            status = for_write ? EFAULT : ENOENT;
+        } else if (result->status) {
+            status = for_write ? result->status : ENOENT;
+        }
+        if (status == 0 && mask & X_OK) {
+            // Fuse is mounted with MS_NOEXEC.
+            fuse_reply_err(req, EACCES);
+            return;
+        }
     } else {
         if (mask & X_OK) {
             // Fuse is mounted with MS_NOEXEC.
