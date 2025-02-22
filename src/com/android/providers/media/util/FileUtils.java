@@ -89,6 +89,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -96,6 +97,7 @@ import java.util.function.Consumer;
 import java.util.function.ObjIntConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class FileUtils {
     // Even though vfat allows 255 UCS-2 chars, we might eventually write to
@@ -1052,6 +1054,16 @@ public class FileUtils {
         }
     }
 
+    private static final List<String> ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES =
+            Stream.concat(
+                    Arrays.stream(DEFAULT_FOLDER_NAMES),
+                    Stream.of("Android")
+            ).sorted().distinct().toList();
+
+    private static final List<String> ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE =
+            ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES
+                    .stream().map(s -> s.toLowerCase(Locale.ROOT)).toList();
+
     /**
      * Regex that matches paths for {@link MediaColumns#RELATIVE_PATH}
      */
@@ -1864,5 +1876,19 @@ public class FileUtils {
     public static File canonicalize(@NonNull File file) throws IOException {
         Objects.requireNonNull(file);
         return file.getCanonicalFile();
+    }
+
+    public static boolean isAlwaysVisibleDirectoryName(final String lowercaseName) {
+        return ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES_LOWERCASE.contains(lowercaseName);
+    }
+
+    /**
+     * Fill a list with the standard always-visible directory entries that are expected in
+     * storage paths, e.g. Android, DCIM, Music, etc.
+     *
+     * @param entries An existing list, which may or may not be empty, of directory entry names.
+     */
+    public static void fillWithAlwaysVisibleStorageDirectoryEntries(@NonNull List<String> entries) {
+        entries.addAll(ALWAYS_VISIBLE_EMULATED_STORAGE_DIRECTORY_ENTRIES);
     }
 }
