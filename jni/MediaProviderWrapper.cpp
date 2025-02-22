@@ -125,14 +125,14 @@ bool isUidAllowedAccessToDataOrObbPathInternal(JNIEnv* env, jobject media_provid
 }
 
 std::vector<std::shared_ptr<DirectoryEntry>> getFilesInDirectoryInternal(
-        JNIEnv* env, jobject media_provider_object, jmethodID mid_get_files_in_dir, uid_t uid,
+        JNIEnv* env, jobject media_provider_object, jmethodID mid_get_entries_in_dir, uid_t uid,
         const string& path) {
     std::vector<std::shared_ptr<DirectoryEntry>> directory_entries;
     ScopedLocalRef<jstring> j_path(env, env->NewStringUTF(path.c_str()));
 
     ScopedLocalRef<jobjectArray> files_list(
             env, static_cast<jobjectArray>(env->CallObjectMethod(
-                         media_provider_object, mid_get_files_in_dir, j_path.get(), uid)));
+                         media_provider_object, mid_get_entries_in_dir, j_path.get(), uid)));
 
     if (CheckForJniException(env)) {
         directory_entries.push_back(std::make_shared<DirectoryEntry>("", EFAULT));
@@ -228,8 +228,8 @@ MediaProviderWrapper::MediaProviderWrapper(JNIEnv* env, jobject media_provider) 
                                     "(Ljava/lang/String;Ljava/lang/String;IIIZZZ)Lcom/android/"
                                     "providers/media/FileOpenResult;");
     mid_is_diraccess_allowed_ = CacheMethod(env, "isDirAccessAllowed", "(Ljava/lang/String;II)I");
-    mid_get_files_in_dir_ =
-            CacheMethod(env, "getFilesInDirectory", "(Ljava/lang/String;I)[Ljava/lang/String;");
+    mid_get_entries_in_dir_ =
+            CacheMethod(env, "getEntriesInDirectory", "(Ljava/lang/String;I)[Ljava/lang/String;");
     mid_rename_ = CacheMethod(env, "rename", "(Ljava/lang/String;Ljava/lang/String;I)I");
     mid_is_uid_allowed_access_to_data_or_obb_path_ =
             CacheMethod(env, "isUidAllowedAccessToDataOrObbPath", "(ILjava/lang/String;)Z");
@@ -380,16 +380,13 @@ std::vector<std::shared_ptr<DirectoryEntry>> MediaProviderWrapper::GetDirectoryE
     }
 
     JNIEnv* env = MaybeAttachCurrentThread();
-    res = getFilesInDirectoryInternal(env, media_provider_object_, mid_get_files_in_dir_, uid, path);
+    res = getFilesInDirectoryInternal(env, media_provider_object_, mid_get_entries_in_dir_, uid, path);
 
     const int res_size = res.size();
     if (res_size && res[0]->d_name[0] == '/') {
         // Path is unknown to MediaProvider, get files and directories from lower file system.
         res.resize(0);
         addDirectoryEntriesFromLowerFs(dirp, /* filter */ nullptr, &res);
-    } else if (res_size == 0 || !res[0]->d_name.empty()) {
-        // add directory names from lower file system.
-        addDirectoryEntriesFromLowerFs(dirp, /* filter */ &isDirectory, &res);
     }
     return res;
 }
