@@ -179,4 +179,16 @@ public class Logging {
 
         return sPersistentDir.resolve(String.valueOf(System.currentTimeMillis()));
     }
+
+    public static void logv(String msg) {
+        if (LOGV) {
+            Log.v(TAG, msg);
+        }
+    }
+
+    public static void logv(String msg, Throwable throwable) {
+        if (LOGV) {
+            Log.v(TAG, msg, throwable);
+        }
+    }
 }
