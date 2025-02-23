@@ -33,6 +33,24 @@
       "message": "It\u0027s tricky to tell what might go wrong if we remove these codepoints from paths - how paths may get treated differently in unanticipated ways that could actually grant extra access, or leave openings, rather than restricting access.\n\nFor this reason, I want to try changing the approach to simply reject dealing with paths that have such codepoints, with the goal being to react to such operations with \"permission denied\" / \"access denied\", or perhaps in the case of directory listings, to return no contents.",
       "revId": "21f74da80327dc399a4ad350dbc886248e5736d1",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b80f5152_d0f77b94",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-23T19:27:52Z",
+      "side": 1,
+      "message": "I\u0027ve now done this for PS3, but:\n- Paths are *still* probe-able when ignorable codepoints are included, because \"No such file or directory\" is shown when files truly doesn\u0027t exist, with our error/exception not even being logged, whereas \"Operation not permitted\" is shown when we do catch and handle these codepoints.\n- `stat` also still works on paths containing ignorable codepoints.\n- As commented elsewhere in this relation chain, this might be unavoidable without further hooks in FuseDaemon. Not sure.",
+      "parentUuid": "293f97f9_b95b3b53",
+      "revId": "21f74da80327dc399a4ad350dbc886248e5736d1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
