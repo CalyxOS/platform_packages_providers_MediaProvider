@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b756bcf1_040b414a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-23T17:43:24Z",
+      "side": 1,
+      "message": "Subdirectories can still be probed and their contents listed. So, trying to list `Android/data` with ignorable codepoints gets \"Permission denied\" now, but `Andr$\u0027\\u206b\u0027oid/data/some.other.package` still works fine.",
+      "revId": "21f74da80327dc399a4ad350dbc886248e5736d1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
