@@ -106,6 +106,41 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "f95447be_d2c43e7f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-23T13:54:46Z",
+      "side": 1,
+      "message": "(And even `ls` is working again right now.)",
+      "parentUuid": "ea98e256_82393586",
+      "revId": "6f5cfaca5575bba7d68cbbbbf63dccc2842cd7ab",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4325d967_f0e3c987",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-23T13:54:46Z",
+      "side": 1,
+      "message": "Looks like FuseDaemon.cpp doesn\u0027t implement hooks for some things, if I am reading it correctly (they are commented out). If we don\u0027t hook these things, they might be avenues toward probing for files - for example, trying to get a file\u0027s attributes might simply return those attributes for existing files, or show a permission denied instead of file not found, etc.",
+      "revId": "6f5cfaca5575bba7d68cbbbbf63dccc2842cd7ab",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "604015c1_b6af810f",
         "filename": "src/com/android/providers/media/MediaProvider.java",
         "patchSetId": 2
