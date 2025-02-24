@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d7272145_c64e2378",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-24T06:02:15Z",
+      "side": 1,
+      "message": "Add tests. They should verify things like:\n\n- \"/storage/emulated/0/Android/data\": accept\n\n- \"/storage/emulated/0/Android/data/\": accept\n\n- \"/storage/emulated/0/Andr\\u200boid/data\": reject\n\n- \"/storage/emulated/0/Andr\\u200\\u200boid/data\": reject\n\n- \"/storage/emulated/0/Andr\\u200\\u200boid/data/\": reject\n\n- \"/storage/emulated/0/Andr\\u200\\u200boid/dataa\": accept\n\n- \"/storage/emulated/0/Android/dataa\": accept\n\n- \"/storage/emulated/0/Android/dataaa\": accept",
+      "revId": "c078757612ef3e9e08e95db6ed6e301ed9643fcb",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}

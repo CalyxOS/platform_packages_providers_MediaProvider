@@ -16,6 +16,24 @@
       "message": "On second thought, erroring for all such paths is too heavy-handed.\n\nThis isn\u0027t knowingly a problem outside of Android/data (and I guess Android/obb) at all, and I do not want to permanently prevent access to files or folders that happen to contain these.\n\nParts of this approach could still work, but it needs to be targeted at Android/data and Android/obb somehow and kept as limited as possible. This could come *after* an approach is found that works, though. Right now, even with heavy-handedness, it\u0027s not fully working. From some testing, I think that some FuseDaemon changes are needed, too, possibly altering do_lookup there or something.",
       "revId": "8935e7fe64be28c615244529058c08817489ea98",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b77349e0_1c97f864",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-24T06:02:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3150d937_14915960",
+      "revId": "8935e7fe64be28c615244529058c08817489ea98",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
