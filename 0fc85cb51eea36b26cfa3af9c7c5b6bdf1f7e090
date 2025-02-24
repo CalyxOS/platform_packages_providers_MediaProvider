@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ed54f16_351fa137",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1928,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-24T13:53:15Z",
+      "side": 1,
+      "message": "Improve or just remove all these debug lines",
+      "revId": "0fc85cb51eea36b26cfa3af9c7c5b6bdf1f7e090",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
