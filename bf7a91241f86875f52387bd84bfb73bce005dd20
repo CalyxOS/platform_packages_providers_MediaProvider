@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "49be70d4_6673b6c6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-25T12:20:33Z",
+      "side": 1,
+      "message": "In Termux, cannot create files or folders, even with proper permissions, except in Download or Documents. \"Operation not permitted\" otherwise. Oops.",
+      "revId": "bf7a91241f86875f52387bd84bfb73bce005dd20",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
