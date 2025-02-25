@@ -16,6 +16,24 @@
       "message": "As pointed out in [this comment](https://review.calyxos.org/c/CalyxOS/platform_packages_providers_MediaProvider/+/35638/comments/9c3dfaeb_0e8ebee2), `isIdentifierIgnorable` does not seem to be equivalent to checking whether the character type is `DEFAULT_IGNORABLE_CODE_POINT`. We\u0027d need a way to do this in Java. But it\u0027s possible this should all be reworked to be done in C++ and FuseDaemon.cpp so that things can be blocked at a sufficiently low level and have an effect on `stat` and friends.",
       "revId": "a59f63738e83916065292cec72ff8ff2670ac49b",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0e626912_be701850",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1896,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-25T02:50:31Z",
+      "side": 1,
+      "message": "Try this search: https://cs.android.com/search?q\u003dDEFAULT_IGNORABLE_CODE_POINT%20-path:external%20-path:prebuilts",
+      "parentUuid": "f894ecb6_43faf9f4",
+      "revId": "a59f63738e83916065292cec72ff8ff2670ac49b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
