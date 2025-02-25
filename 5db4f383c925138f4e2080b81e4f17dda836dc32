@@ -50,6 +50,24 @@
       "message": "This still works and lists subdirectories: `ls /sdcard/Andr$\u0027\\ufff0\u0027oid/data`",
       "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "890b0246_57becd92",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-25T02:41:50Z",
+      "side": 1,
+      "message": "This specific case is fixed in PS8 by checking the UCHAR_DEFAULT_IGNORABLE_CODE_POINT property of the characters instead of checking if the ID is overall ignorable. Don\u0027t ask me what the difference is. There may still be other issues too.",
+      "parentUuid": "9c3dfaeb_0e8ebee2",
+      "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
