@@ -33,6 +33,23 @@
       "message": "Check for *any* differences in what icu here considers an ignorable identifier vs what the [kernel](https://android-review.googlesource.com/c/kernel/common/+/3406091) does",
       "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9c3dfaeb_0e8ebee2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-25T02:11:15Z",
+      "side": 1,
+      "message": "This still works and lists subdirectories: `ls /sdcard/Andr$\u0027\\ufff0\u0027oid/data`",
+      "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
