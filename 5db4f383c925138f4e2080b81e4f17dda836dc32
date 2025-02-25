@@ -16,6 +16,23 @@
       "message": "It appears to work in all my manual tests but I wouldn\u0027t be comfortable Works+1 yet.",
       "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "493e980c_5c0b8654",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-02-25T00:15:30Z",
+      "side": 1,
+      "message": "Check for *any* differences in what icu here considers an ignorable identifier vs what the [kernel](https://android-review.googlesource.com/c/kernel/common/+/3406091) does",
+      "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
