@@ -33,6 +33,24 @@
       "message": "Despite the fact that another method does this (that method doesn\u0027t get called much I guess, since it is skipped for some situations), this can *crash spectacularly* if the path is not valid \"Modified UTF-8\".\n\nTry `ls -l /storage/emulated/0/test$\u0027u\\200b\u0027` and get a \"Software caused connection abort\" error and a big crash in logs. That `u\\200b` is from a typo I made. The backslash should come first, normally. Writing it this way instead is invalid enough to bring this issue to light.",
       "revId": "bf7a91241f86875f52387bd84bfb73bce005dd20",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "638d51b2_b6a6ecad",
+        "filename": "jni/MediaProviderWrapper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-01T13:14:52Z",
+      "side": 1,
+      "message": "This only causes crashes with -eng builds because other builds don\u0027t check for invalid modified UTF-8. It may lead to other bizarre behavior though, like folders that cannot be deleted. This is kind of a separate problem that affects stock, too.\n\nWill Resolve once I put this issue somewhere else.",
+      "parentUuid": "170bd932_b71a3b23",
+      "revId": "bf7a91241f86875f52387bd84bfb73bce005dd20",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
