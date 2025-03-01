@@ -16,6 +16,24 @@
       "message": "Android folder needs to be made visible all the time!\n\nOtherwise there is an issue where apps without storage permissions cannot even access /sdcard/Android/data/$packageName",
       "revId": "7fbfeb2c6e17690823b3cbc2d2ae4e7b51b1e2ae",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c43e505_6e6a6190",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-01T13:15:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6aae278a_268cd0fd",
+      "revId": "7fbfeb2c6e17690823b3cbc2d2ae4e7b51b1e2ae",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
