@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5a4f15cf_879c495c",
+        "filename": "jni/FuseDaemon.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-06T14:00:00Z",
+      "side": 1,
+      "message": "Oops, include obb.",
+      "revId": "3c189cb205efc411e51618f983b117c5ef0c1fdb",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
