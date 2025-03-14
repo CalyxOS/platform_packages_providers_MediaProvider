@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "efe8d90c_3a2e50bb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-14T19:27:48Z",
+      "side": 1,
+      "message": "Sadly, there are occasionally some serious MediaProvider crashes with this when interacting with enough files/folders, and worse, from the stack traces, they don\u0027t even seem related, yet without this, no crashes. It may be stack corruption or something, which may or may not be related to my code - not sure.\n\n\"Serious\" means that the app (maybe every app?) loses its view of /storage/emulated/ and their processes may be killed. The Files app would show an hourglass page and explain it can\u0027t load at the moment or something to that effect.\n\n`Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 4768 (Thread-4), pid 3971 (rs.media.module)`\n\n```\n\u003ccrash\u003e\n\u003cregex matching and internals\u003e\nis_bpf_backing_path\nmake_node_entry\ndo_lookup\ndo_readdir_common\npf_readdirplus\ndo_readdirplus\n...\n```",
+      "revId": "b4b9410d9cf3e59642814ae4d1ca8166faa16100",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "01c96648_8c8f90c7",
+        "filename": "jni/FuseDaemon.cpp",
+        "patchSetId": 14
+      },
+      "lineNbr": 597,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-14T19:27:48Z",
+      "side": 1,
+      "message": "line too long",
+      "revId": "b4b9410d9cf3e59642814ae4d1ca8166faa16100",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
