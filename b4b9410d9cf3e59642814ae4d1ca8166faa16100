@@ -56,6 +56,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "54876486_01f0818e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-24T22:34:08Z",
+      "side": 1,
+      "message": "Since I am still lacking such steps, I went back to PS14 (non-\"Debugging\") to get a better feel for this. There is crashing at least 3 times per day. It stopped playback of a podcast once. So even though I don\u0027t know what causes this, I know it should happen without my needing to do anything special to trigger it, as long as I give it time and go about my business. That\u0027s what I will have to do I guess; flash something and forget about it for a few days, then check logs.\n\nI did find a surefire crash method, but that\u0027s a separate and unrelated bug.",
+      "parentUuid": "1fae46de_ad77c9db",
+      "revId": "b4b9410d9cf3e59642814ae4d1ca8166faa16100",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "01c96648_8c8f90c7",
         "filename": "jni/FuseDaemon.cpp",
         "patchSetId": 14
