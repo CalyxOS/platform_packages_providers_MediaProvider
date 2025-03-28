@@ -110,6 +110,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "b4071e00_c7b802a7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-03-28T15:47:23Z",
+      "side": 1,
+      "message": "I copied my functions into a new Android app project with C++, and included libicu, and ran some tests. I observed a memory leak + crash and finally traced it back to something sad: in this code, I call `utext_openUTF8` but never call `utext_close` anywhere. Could have sworn I had it once, but not now...",
+      "parentUuid": "1fb2b696_24a5538e",
+      "revId": "b4b9410d9cf3e59642814ae4d1ca8166faa16100",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "01c96648_8c8f90c7",
         "filename": "jni/FuseDaemon.cpp",
         "patchSetId": 14
