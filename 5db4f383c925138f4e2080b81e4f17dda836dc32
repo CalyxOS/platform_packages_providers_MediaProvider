@@ -68,6 +68,24 @@
       "parentUuid": "9c3dfaeb_0e8ebee2",
       "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7e775d39_9840b606",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-08T20:36:24Z",
+      "side": 1,
+      "message": "Apparently there is one additional code point that Android matches but the kernel doesn\u0027t: `180F`.\n\nSpot-checking a couple kernels, I see their README.utf8data files point reference Unicode 12.1.0:\n- [raviole-6.1-android15-qpr2](https://android.googlesource.com/kernel/common/+/refs/heads/android-gs-raviole-6.1-android15-qpr2/fs/unicode/README.utf8data)\n- [google_redbull/android14](https://gitlab.com/CalyxOS/kernel_google_redbull/-/blob/android14/fs/unicode/README.utf8data)\n- [fairphone_qcm6490/android14](https://gitlab.com/CalyxOS/kernel_fairphone_qcm6490/-/blob/android14/fs/unicode/README.utf8data)\n\nIf you look at [DerivedCoreProperties.txt](https://www.unicode.org/Public/12.1.0/ucd/DerivedCoreProperties.txt), you can see the `Default_Ignorable_Code_Point` character ranges that the kernel ends up using. Are these the same as what ICU here is using?\n\nLooks like Android proper is [using this for android15-qpr2-release](\nhttps://cs.android.com/android/platform/superproject/+/android15-qpr2-release:external/icu/icu4c/source/data/unidata/DerivedCoreProperties.txt;l\u003d10359-10385).\n\nAndroid\u0027s icu4c has 4174 default ignorable code points, but its kernel has 4173 default ignorable code points.\n\nAndroid has the additional `180F` code point.\n\nThis means this change is being stricter by a single code point. This should be fine. As long as this change is more strict and not less, it should be okay.\n\nTo confirm:\n- On stock, which remains affected, in Terminal Emulator, try `ls $\u0027/sdcard/Android/data\\u180f`. You will receive \"No such file or directory\". If you use `\\u180e` instead, you\u0027ll get the full listing.\n- On CalyxOS or AOSP, with this change, try the above. Either way, you\u0027ll get \"Invalid argument\". That\u0027s okay.",
+      "parentUuid": "493e980c_5c0b8654",
+      "revId": "5db4f383c925138f4e2080b81e4f17dda836dc32",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
