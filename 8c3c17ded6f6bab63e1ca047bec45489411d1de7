@@ -20,6 +20,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "3a68dd88_42ba2770",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 21
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-14T20:00:59Z",
+      "side": 1,
+      "message": "Ran tests in AOSP android-15.0.0_r26 (15 QPR2 April 2025) - before this change and after. I figured CalyxOS would have some issues running tests related to our changes, and it did - for example, it failed with something related to our strict location redaction. But AOSP also had issues.\n\nI used the presubmit tests from TEST_MAPPING:\n`atest --no-metrics MediaProviderTests MediaProviderClientTests CtsMediaProviderTestCases AdoptableHostTest CtsScopedStorageCoreHostTest CtsScopedStorageHostTest CtsScopedStorageDeviceOnlyTest CtsScopedStorageBypassDatabaseOperationsTest CtsScopedStorageGeneralTest CtsScopedStorageRedactUriTest fuse_node_test CtsOsTestCases`\n\nThe results were the same for both, with 20 failures in both cases:\n```\nandroid.appsecurity.cts.AdoptableHostTest#testEjected\nandroid.appsecurity.cts.AdoptableHostTest#testApps\nandroid.appsecurity.cts.AdoptableHostTest#testPrimaryStorage\nandroid.appsecurity.cts.AdoptableHostTest#testPackageInstaller\nandroid.os.cts.BinderIntegrationTest#testOnFrozenStateChangedCalled\nandroid.os.cts.BinderIntegrationTest#testOnFrozenStateChangedNotCalledAfterCallbackRemoved\nandroid.os.cts.BinderIntegrationTest#testOnFrozenStateChangedUsingExecutor\nandroid.os.cts.BuildVersionTest#testBuildFingerprint\nandroid.os.cts.TestLooperManagerTest#testMainThread\nandroid.os.cts.TestLooperManagerTest#testCustomThread\nandroid.os.cts.TokenWatcherTest#testCleanUp\nandroid.os.cts.TokenWatcherTest#testRepeatedAcquire\nandroid.os.cts.TokenWatcherTest#testTokenWatcher\nandroid.os.storage.cts.StorageManagerTest#testCallback\nandroid.os.storage.cts.StorageManagerTest#testGetExternalUuidForPath\nandroid.os.storage.cts.StorageManagerTest#testGetPrimaryVolume\nandroid.os.storage.cts.StorageManagerTest#testMountAndUnmountObbNormal\nandroid.os.storage.cts.StorageManagerTest#testMountAndUnmountTwoObbs\nandroid.os.storage.cts.StorageManagerTest#testOpenProxyFileDescriptor\n```",
+      "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "08f3d4a9_71b8147d",
         "filename": "jni/FuseDaemon.cpp",
         "patchSetId": 21
@@ -31,6 +48,24 @@
       "writtenOn": "2025-04-14T14:48:05Z",
       "side": 1,
       "message": "Outdated comment: It\u0027s not just /storage/emulated but anything under storage, now (so potentially affecting external SD cards, maybe?). Regardless, if it\u0027s not affected, we won\u0027t be encountering it anyway.",
+      "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8e167f1_a011be9c",
+        "filename": "jni/FuseDaemon.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-14T20:00:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08f3d4a9_71b8147d",
       "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
@@ -48,6 +83,24 @@
       "writtenOn": "2025-04-14T14:48:05Z",
       "side": 1,
       "message": "Outdated comment: We\u0027re clearly returning an empty string for SDK \u003c31, not the same string.",
+      "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ddab57e1_ac3b5fb1",
+        "filename": "jni/FuseUtils.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-14T20:00:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cce1f66d_ec371a1a",
       "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
