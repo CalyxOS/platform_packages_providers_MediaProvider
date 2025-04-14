@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "88fa01c3_663a56ce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 21
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-14T14:17:45Z",
+      "side": 1,
+      "message": "Patch 19-\u003e20 is an update based on suggestions from the original reporter. It simplifies one of the checks, removing an attempt at performance optimization that was probably not needed and was making things more confusing / possibly causing some devices / filesystems to be left out of the fix.\n\nPerformance of this fix has never been formally evaluated, but in everyday experience it has been fine and I don\u0027t expect issues.",
+      "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
