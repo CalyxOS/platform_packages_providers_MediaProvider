@@ -16,6 +16,40 @@
       "message": "Patch 19-\u003e20 is an update based on suggestions from the original reporter. It simplifies one of the checks, removing an attempt at performance optimization that was probably not needed and was making things more confusing / possibly causing some devices / filesystems to be left out of the fix.\n\nPerformance of this fix has never been formally evaluated, but in everyday experience it has been fine and I don\u0027t expect issues.",
       "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "08f3d4a9_71b8147d",
+        "filename": "jni/FuseDaemon.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 547,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-14T14:48:05Z",
+      "side": 1,
+      "message": "Outdated comment: It\u0027s not just /storage/emulated but anything under storage, now (so potentially affecting external SD cards, maybe?). Regardless, if it\u0027s not affected, we won\u0027t be encountering it anyway.",
+      "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cce1f66d_ec371a1a",
+        "filename": "jni/FuseUtils.cpp",
+        "patchSetId": 21
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-04-14T14:48:05Z",
+      "side": 1,
+      "message": "Outdated comment: We\u0027re clearly returning an empty string for SDK \u003c31, not the same string.",
+      "revId": "8c3c17ded6f6bab63e1ca047bec45489411d1de7",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
