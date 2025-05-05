@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b58042cd_2f1b2c6d",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1883,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-05T17:12:29Z",
+      "side": 1,
+      "message": "How does this affect external storage, then (SD cards, USB, ...)?",
+      "revId": "5895536299efe38ad3bcb4b2a39029f0c3731712",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
