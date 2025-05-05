@@ -69,6 +69,24 @@
       "parentUuid": "170bd932_b71a3b23",
       "revId": "bf7a91241f86875f52387bd84bfb73bce005dd20",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0006f478_499d3679",
+        "filename": "jni/MediaProviderWrapper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-05T16:06:53Z",
+      "side": 1,
+      "message": "Reported here: https://issuetracker.google.com/issues/415748356",
+      "parentUuid": "638d51b2_b6a6ecad",
+      "revId": "bf7a91241f86875f52387bd84bfb73bce005dd20",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
