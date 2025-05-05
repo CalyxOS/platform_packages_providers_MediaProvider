@@ -34,6 +34,24 @@
       "parentUuid": "f894ecb6_43faf9f4",
       "revId": "a59f63738e83916065292cec72ff8ff2670ac49b",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c82db05e_42ab395e",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1896,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-05T15:05:20Z",
+      "side": 1,
+      "message": "This comment is no longer relevant to this change.",
+      "parentUuid": "0e626912_be701850",
+      "revId": "a59f63738e83916065292cec72ff8ff2670ac49b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

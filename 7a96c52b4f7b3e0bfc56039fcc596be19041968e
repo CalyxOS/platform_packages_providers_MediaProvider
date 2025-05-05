@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a07423ec_2eff9499",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-05T15:05:20Z",
+      "side": 1,
+      "message": "Unused",
+      "revId": "7a96c52b4f7b3e0bfc56039fcc596be19041968e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dee3a1c3_548ac9e2",
+        "filename": "src/com/android/providers/media/util/Logging.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-05T15:05:20Z",
+      "side": 1,
+      "message": "These additions are all unused",
+      "revId": "7a96c52b4f7b3e0bfc56039fcc596be19041968e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
