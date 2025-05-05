@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "47641e1c_4871a3c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-05T17:15:53Z",
+      "side": 1,
+      "message": "We\u0027ve gone from 20 test failures to 39 test failures vs [this comment](https://review.calyxos.org/c/CalyxOS/platform_packages_providers_MediaProvider/+/35638/comments/3a68dd88_42ba2770), with `atest --no-metrics MediaProviderTests MediaProviderClientTests CtsMediaProviderTestCases AdoptableHostTest CtsScopedStorageCoreHostTest CtsScopedStorageHostTest CtsScopedStorageDeviceOnlyTest CtsScopedStorageBypassDatabaseOperationsTest CtsScopedStorageGeneralTest CtsScopedStorageRedactUriTest fuse_node_test CtsOsTestCases`.\n\nNote that some failures might be unavoidable, given that the current (expected) behavior is bad for privacy, but they should at least be looked at.\n\n```\nandroid.appsecurity.cts.AdoptableHostTest#testEjected\nandroid.appsecurity.cts.AdoptableHostTest#testApps\nandroid.appsecurity.cts.AdoptableHostTest#testPrimaryStorage\nandroid.appsecurity.cts.AdoptableHostTest#testPackageInstaller\nandroid.provider.cts.media.MediaStoreIntentsTest#testViewImageDir[0]\nandroid.provider.cts.media.MediaStoreIntentsTest#testPickAudioDir[0]\nandroid.provider.cts.media.MediaStoreIntentsTest#testViewVideoDir[0]\nandroid.provider.cts.media.MediaStoreIntentsTest#testViewImageDir[1]\nandroid.provider.cts.media.MediaStoreIntentsTest#testPickAudioDir[1]\nandroid.provider.cts.media.MediaStoreIntentsTest#testViewVideoDir[1]\nandroid.provider.cts.media.MediaStoreIntentsTest#testViewImageDir[2]\nandroid.provider.cts.media.MediaStoreIntentsTest#testPickAudioDir[2]\nandroid.provider.cts.media.MediaStoreIntentsTest#testViewVideoDir[2]\nandroid.provider.cts.media.MediaStore_Images_MediaTest#testLocationRedaction[0]\nandroid.provider.cts.media.MediaStore_Images_MediaTest#testLocationRedaction[1]\nandroid.provider.cts.media.MediaStore_Images_MediaTest#testLocationRedaction[2]\nandroid.provider.cts.media.MediaStore_Video_MediaTest#testOriginalAccess[0]\nandroid.provider.cts.media.MediaStore_Video_MediaTest#testOriginalAccess[1]\nandroid.provider.cts.media.MediaStore_Video_MediaTest#testOriginalAccess[2]\nandroid.os.cts.BatteryChangedBroadcastTest#batteryStatusUpdated_broadcastSentImmediately\nandroid.os.cts.BinderIntegrationTest#testOnFrozenStateChangedCalled\nandroid.os.cts.BinderIntegrationTest#testOnFrozenStateChangedNotCalledAfterCallbackRemoved\nandroid.os.cts.BinderIntegrationTest#testOnFrozenStateChangedUsingExecutor\nandroid.os.cts.BuildVersionTest#testBuildFingerprint\nandroid.os.cts.SecurityStateManagerTest#testGetGlobalSecurityState\nandroid.os.cts.TestLooperManagerTest#testMainThread\nandroid.os.cts.TestLooperManagerTest#testCustomThread\nandroid.os.cts.TokenWatcherTest#testCleanUp\nandroid.os.cts.TokenWatcherTest#testRepeatedAcquire\nandroid.scopedstorage.cts.device.StorageOtherFilesTest#other_accessLocationMetadata\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testListDirectoriesWithNonMediaFiles[volume\u003dexternal]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testListFilesFromExternalMediaDirectory[volume\u003dexternal]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testListDirectoriesWithMediaFiles[volume\u003dexternal]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testAccessMediaLocationInvalidation[volume\u003dexternal]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testListDirectoriesWithNonMediaFiles[volume\u003dvolume_public]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testListFilesFromExternalMediaDirectory[volume\u003dvolume_public]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testListDirectoriesWithMediaFiles[volume\u003dvolume_public]\nandroid.scopedstorage.cts.general.ScopedStorageDeviceTest#testAccessMediaLocationInvalidation[volume\u003dvolume_public]\ncom.android.providers.media.IdleServiceTest#test_idle_maintenance_nonDemoDevice\n```",
+      "revId": "5895536299efe38ad3bcb4b2a39029f0c3731712",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b58042cd_2f1b2c6d",
         "filename": "src/com/android/providers/media/util/FileUtils.java",
         "patchSetId": 7
