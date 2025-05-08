@@ -53,6 +53,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "607d4701_40fe8b8f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-08T20:41:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c8aa42c_38a2fb20",
+      "revId": "5895536299efe38ad3bcb4b2a39029f0c3731712",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b58042cd_2f1b2c6d",
@@ -66,6 +84,24 @@
       "writtenOn": "2025-05-05T17:12:29Z",
       "side": 1,
       "message": "How does this affect external storage, then (SD cards, USB, ...)?",
+      "revId": "5895536299efe38ad3bcb4b2a39029f0c3731712",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de0e8bb5_60f99b35",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 1883,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-08T20:41:11Z",
+      "side": 1,
+      "message": "Still don\u0027t know, but I made this apply to anything matched by FileUtils.java\u0027s PATTERN_VISIBLE pattern (shouldBeVisible function).",
+      "parentUuid": "b58042cd_2f1b2c6d",
       "revId": "5895536299efe38ad3bcb4b2a39029f0c3731712",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
