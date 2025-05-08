@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cd0ed09a_3e27df98",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1888,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-08T20:51:12Z",
+      "side": 1,
+      "message": "What\u0027s the performance impact of this, especially for a directory with many entries? Could there be a more efficient way to handle this? Perhaps instead we could restructure things so that, for entries of paths which shouldBeVisible, we *don\u0027t* add any of these always-visible names if found initially, only adding them after? Or something. And then if the user has a folder like \"downLOAD\" it will be replaced with a more normal \"Download\" which seems like a fine thing (or does it?).",
+      "revId": "39a7c3eb4628f6496219d4ef061fd4575c798e02",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "386e0325_f4643b5c",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 1894,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-08T20:51:12Z",
+      "side": 1,
+      "message": "What if the folder doesn\u0027t even exist? In testing this didn\u0027t lead to visible problems, but what if there are invisible problems?",
+      "revId": "39a7c3eb4628f6496219d4ef061fd4575c798e02",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
