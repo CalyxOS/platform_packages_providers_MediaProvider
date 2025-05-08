@@ -38,6 +38,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5c8aa42c_38a2fb20",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-08T20:34:52Z",
+      "side": 1,
+      "message": "We don\u0027t need to worry about access to directories like /storage/emulated/$someOtherUserId I think. That should already be prohibited by other means. So I should be able to simplify this a lot.",
+      "revId": "5895536299efe38ad3bcb4b2a39029f0c3731712",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b58042cd_2f1b2c6d",
         "filename": "src/com/android/providers/media/util/FileUtils.java",
         "patchSetId": 7
