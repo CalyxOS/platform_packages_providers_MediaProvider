@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c332525_c3005fbd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-09T19:57:10Z",
+      "side": 1,
+      "message": "This requires root unless labeled. Okay for testing with a userdebug build though.",
+      "revId": "a9dcddd01706221cce93984beeffed4542282768",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
