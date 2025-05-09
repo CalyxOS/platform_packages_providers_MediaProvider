@@ -16,6 +16,23 @@
       "message": "This requires root unless labeled. Okay for testing with a userdebug build though.",
       "revId": "a9dcddd01706221cce93984beeffed4542282768",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b05203f7_8829fd6a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-09T20:05:44Z",
+      "side": 1,
+      "message": "Bug: In Terminal Emulator:\n```\ncd /sdcard/Download\necho hello \u003e world.txt\nls -l\n```\n\nworld.txt should be listed. It\u0027s not. It\u0027s listed when trying this after turning off the property for this change and restarting. Is the mime_type null for such files?\n\nThis and the other directory change *might* not ultimately be necessary. So far, the \"Prevent lookup of inaccessible directory entries\" change looks like it might be accomplishing this change\u0027s goals and more on its own (its own bugs notwithstanding) based on testing with only its property turned on. And when doing so, this bug doesn\u0027t appear!",
+      "revId": "a9dcddd01706221cce93984beeffed4542282768",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
