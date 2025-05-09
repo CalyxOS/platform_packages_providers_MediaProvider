@@ -33,6 +33,24 @@
       "message": "Bug: In Terminal Emulator:\n```\ncd /sdcard/Download\necho hello \u003e world.txt\nls -l\n```\n\nworld.txt should be listed. It\u0027s not. It\u0027s listed when trying this after turning off the property for this change and restarting. Is the mime_type null for such files?\n\nThis and the other directory change *might* not ultimately be necessary. So far, the \"Prevent lookup of inaccessible directory entries\" change looks like it might be accomplishing this change\u0027s goals and more on its own (its own bugs notwithstanding) based on testing with only its property turned on. And when doing so, this bug doesn\u0027t appear!",
       "revId": "a9dcddd01706221cce93984beeffed4542282768",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5863b7eb_05b3139a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-09T20:19:15Z",
+      "side": 1,
+      "message": "[Another way to check if it\u0027s a directory](https://cs.android.com/android/platform/superproject/main/+/main:packages/providers/MediaProvider/src/com/android/providers/media/MediaProvider.java;l\u003d4650-4654;drc\u003de81def57a55a3d03bde7e7a09f3fa9be5e7f495e) (which is actually a place where null is assigned to mime_type too):\n```\n        final Integer formatObject \u003d values.getAsInteger(FileColumns.FORMAT);\n        final int format \u003d formatObject \u003d\u003d null ? 0 : formatObject;\n        if (format \u003d\u003d MtpConstants.FORMAT_ASSOCIATION) {\n            values.putNull(MediaColumns.MIME_TYPE);\n        }\n```\n\n(FORMAT_ASSOCIATION means a directory.)\n\nIf it\u0027s true that mime_type being null is the reason for this issue, and that that\u0027s because a non-directory can have a null mime type, then I am not sure how else to resolve this currently besides checking the FORMAT instead. There *might* not be another way, apart from checking with the underlying filesystem (which is where FUSE has been getting all directory info before this).",
+      "parentUuid": "b05203f7_8829fd6a",
+      "revId": "a9dcddd01706221cce93984beeffed4542282768",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
