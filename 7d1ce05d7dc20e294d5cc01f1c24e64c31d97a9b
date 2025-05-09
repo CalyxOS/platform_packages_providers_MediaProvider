@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0d781cc1_ccc64bc5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-09T18:55:33Z",
+      "side": 1,
+      "message": "I need to look again at the changes to shouldBypassFuseRestrictions to make sure, but it looks like we have been altering some behavior even with strict location redaction turned off, and it looks like this fixup would address that.",
+      "revId": "7d1ce05d7dc20e294d5cc01f1c24e64c31d97a9b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
