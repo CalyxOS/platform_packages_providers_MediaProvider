@@ -10280,7 +10280,7 @@ public class MediaProvider extends ContentProvider {
                 : isCallingPackageLegacyRead();
         final boolean shouldAllowLegacy = StrictLocationRedactionHelper.getInstance(getContext())
                 .isSettingEnabled() ? allowLegacy : true;
-        if (allowLegacy && isRequestingLegacyStorage) {
+        if (shouldAllowLegacy && isRequestingLegacyStorage) {
             return true;
         }
 
