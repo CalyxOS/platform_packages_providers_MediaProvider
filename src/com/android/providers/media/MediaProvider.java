@@ -375,6 +375,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
@@ -3050,7 +3051,7 @@ public class MediaProvider extends ContentProvider {
 
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingLegacyButDeniedSubpermission(/*forWrite*/ false)) {
                 return new String[] {""};
             }
 
@@ -3673,7 +3674,7 @@ public class MediaProvider extends ContentProvider {
             }
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingLegacyButDeniedSubpermission(/*forWrite*/ true)) {
                 return OsConstants.EACCES;
             }
 
@@ -10212,6 +10213,19 @@ public class MediaProvider extends ContentProvider {
         return mCallingIdentity.get().hasPermission(PERMISSION_IS_LEGACY_GRANTED); // guard
     }
 
+    private boolean isCallingPackageRequestingLegacyButDeniedSubpermission(boolean forWrite) {
+        if (isCallingPackageRequestingLegacy()) {
+            if (shouldLegacyAppsBypassFuseRestrictions()) {
+                // Maintain previous behavior where the subpermission is not considered here
+                // because it was already considered within shouldBypassFuseRestrictions.
+                return true;
+            }
+            return forWrite ? !isCallingPackageLegacyWrite()
+                    : !isCallingPackageLegacyRead();
+        }
+        return false;
+    }
+
     private boolean shouldBypassDatabase(int uid) {
         if (uid != android.os.Process.SHELL_UID && isCallingPackageManager()) {
             return mCallingIdentity.get().shouldBypassDatabase(false /*isSystemGallery*/);
@@ -10260,6 +10274,20 @@ public class MediaProvider extends ContentProvider {
             mediaType ==  FileColumns.MEDIA_TYPE_VIDEO;
     }
 
+    final AtomicInteger mLegacyAppsBypassFuseRestrictions = new AtomicInteger();
+    private boolean shouldLegacyAppsBypassFuseRestrictions() {
+        // Initialize this behavior just once to avoid bizarre behaviors if it changes
+        // in the middle of something.
+        return mLegacyAppsBypassFuseRestrictions.updateAndGet(value -> {
+            if (value != 0) {
+                return value;
+            }
+            final boolean shouldBypass =
+                    !StrictLocationRedactionHelper.getInstance(getContext()).isSettingEnabled();
+            return shouldBypass ? 1 : -1;
+        }) >= 0 ? true : false; // should never be 0, but if it is, bypass is the default.
+    }
+
     /**
      * Returns true if:
      * <ul>
@@ -10272,18 +10300,18 @@ public class MediaProvider extends ContentProvider {
      * </ul>
      */
     private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath) {
-        return shouldBypassFuseRestrictions(forWrite, filePath, /* allowLegacy */ true);
-    }
-    private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath,
-            boolean allowLegacy) {
-        boolean isRequestingLegacyStorage = forWrite ? isCallingPackageLegacyWrite()
-                : isCallingPackageLegacyRead();
-        final boolean shouldAllowLegacy = StrictLocationRedactionHelper.getInstance(getContext())
-                .isSettingEnabled() ? allowLegacy : true;
-        if (allowLegacy && isRequestingLegacyStorage) {
-            return true;
+        if (shouldLegacyAppsBypassFuseRestrictions()) {
+            boolean isRequestingLegacyStorage = forWrite ? isCallingPackageLegacyWrite()
+                    : isCallingPackageLegacyRead();
+            if (isRequestingLegacyStorage) {
+                return true;
+            }
         }
+        return shouldBypassFuseRestrictions(filePath);
+    }
 
+    /** Returns true if FUSE restrictions should be bypassed but does not make legacy exceptions. */
+    private boolean shouldBypassFuseRestrictions(String filePath) {
         if (isCallingPackageManager()) {
             return true;
         }
@@ -10416,9 +10444,7 @@ public class MediaProvider extends ContentProvider {
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         try {
-            if (!isRedactionNeeded()
-                    || shouldBypassFuseRestrictions(/* forWrite */ false, path,
-                            /* allowLegacy */ false)) {
+            if (!isRedactionNeeded() || shouldBypassFuseRestrictions(path)) {
                 return new long[0];
             }
 
@@ -10629,7 +10655,7 @@ public class MediaProvider extends ContentProvider {
             }
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingLegacyButDeniedSubpermission(forWrite)) {
                 return new FileOpenResult(OsConstants.EACCES /* status */, originalUid,
                         mediaCapabilitiesUid, new long[0]);
             }
@@ -10939,7 +10965,7 @@ public class MediaProvider extends ContentProvider {
 
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingLegacyButDeniedSubpermission(/*forWrite*/ true)) {
                 return OsConstants.EPERM;
             }
 
@@ -11027,7 +11053,8 @@ public class MediaProvider extends ContentProvider {
 
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (!shouldBypass && isCallingPackageRequestingLegacy()) {
+            if (!shouldBypass
+                    && isCallingPackageRequestingLegacyButDeniedSubpermission(/*forWrite*/ true)) {
                 return OsConstants.EPERM;
             }
 
@@ -11127,7 +11154,7 @@ public class MediaProvider extends ContentProvider {
 
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (isCallingPackageRequestingLegacyButDeniedSubpermission(/*forWrite*/ !forRead)) {
                 return OsConstants.EACCES;
             }
             // This is a non-legacy app. Rest of the directories are generally writable
