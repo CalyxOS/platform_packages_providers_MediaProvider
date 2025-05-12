@@ -16,6 +16,40 @@
       "message": "Clean up various comments or excessive debug lines, as these were introduced recently while trying some new things.",
       "revId": "a0d3c103a92478233873b92e95d609be063b65f0",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0d1050f9_7c7972e5",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 11277,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T21:22:03Z",
+      "side": 1,
+      "message": "Don\u0027t forget to remove isUidAllowedToSeePathForFuseOld",
+      "revId": "a0d3c103a92478233873b92e95d609be063b65f0",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d2e4d028_1fb2c278",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 11283,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T21:22:03Z",
+      "side": 1,
+      "message": "\"/\".equals(relativePath)",
+      "revId": "a0d3c103a92478233873b92e95d609be063b65f0",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
