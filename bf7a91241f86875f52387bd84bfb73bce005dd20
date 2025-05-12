@@ -36,6 +36,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "791a32c6_e5507959",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T17:21:57Z",
+      "side": 1,
+      "message": "Done.\n\nNote: Termux shows `No such file or directory` with `ls /sdcard/Movies` with this change, but shows `Permission denied` prior. The prior behavior does allow probing for existence of files or folders. I don\u0027t necessarily see a problem with this new behavior. At least it\u0027s consistent, and prevents `stat`ing.",
+      "parentUuid": "983db34e_38e133f2",
+      "revId": "bf7a91241f86875f52387bd84bfb73bce005dd20",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "170bd932_b71a3b23",

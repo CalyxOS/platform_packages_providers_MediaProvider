@@ -16,6 +16,24 @@
       "message": "`ls: /storage/emulated: No such file or directory` even though /storage/emulated/0 is accessible.\n\nFor legacy apps like Termux which do not have files access granted, `ls: /storage/emulated/0: No such file or directory`. Without this protection, it was `Permission denied`. I didn\u0027t intend to affect that. Would be nice to keep it as Permission denied.",
       "revId": "f60afd18d8bffed5548aeb03502c1ad22ca4c948",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eabb52ec_e9f37ac0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T17:21:57Z",
+      "side": 1,
+      "message": "First item is standard behavior. I see it in stock, too, with Terminal Emulator.\n\nSecond item is fixed in PS14.",
+      "parentUuid": "594d06b4_4a7eb8b3",
+      "revId": "f60afd18d8bffed5548aeb03502c1ad22ca4c948",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

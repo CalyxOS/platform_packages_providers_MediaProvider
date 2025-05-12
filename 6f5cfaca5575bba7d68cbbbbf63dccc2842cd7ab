@@ -195,6 +195,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "4a85914b_dfeb8165",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T17:21:57Z",
+      "side": 1,
+      "message": "Fixed only for top-level directories (e.g. /sdcard/secrets if it exists). Still broken for e.g. /sdcard/Movies/secrets.",
+      "parentUuid": "db5b91e9_367d7ece",
+      "revId": "6f5cfaca5575bba7d68cbbbbf63dccc2842cd7ab",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "604015c1_b6af810f",
         "filename": "src/com/android/providers/media/MediaProvider.java",
         "patchSetId": 2
