@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "292f06f7_61ebf6c3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 18
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T21:03:05Z",
+      "side": 1,
+      "message": "Clean up various comments or excessive debug lines, as these were introduced recently while trying some new things.",
+      "revId": "a0d3c103a92478233873b92e95d609be063b65f0",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
