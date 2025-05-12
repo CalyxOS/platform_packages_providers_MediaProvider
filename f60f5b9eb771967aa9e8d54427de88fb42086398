@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5402e468_13970f70",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 11278,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T21:37:34Z",
+      "side": 1,
+      "message": "Like this FIXME says, we may need to tell MediaProvider from FuseDaemon\u0027s pf_mkdir that we successfully created a directory so that it can be loaded into the database with proper ownership, etc.",
+      "revId": "f60f5b9eb771967aa9e8d54427de88fb42086398",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
