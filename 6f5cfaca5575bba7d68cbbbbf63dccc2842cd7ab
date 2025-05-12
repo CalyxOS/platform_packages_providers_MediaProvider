@@ -213,6 +213,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "05f5c535_4ee04b19",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T18:03:48Z",
+      "side": 1,
+      "message": "Permissionless apps (and perhaps scoped storage apps - potentially same thing?) can create directories within these default top-level directories. Right now, such apps don\u0027t even see the directories they create. This is a tough one.",
+      "parentUuid": "4a85914b_dfeb8165",
+      "revId": "6f5cfaca5575bba7d68cbbbbf63dccc2842cd7ab",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "604015c1_b6af810f",
         "filename": "src/com/android/providers/media/MediaProvider.java",
         "patchSetId": 2

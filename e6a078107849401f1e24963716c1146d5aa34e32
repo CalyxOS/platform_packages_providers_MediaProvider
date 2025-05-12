@@ -34,6 +34,23 @@
       "parentUuid": "dd0ac88c_127becc7",
       "revId": "e6a078107849401f1e24963716c1146d5aa34e32",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f114b1b7_40e8ae4e",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 10889,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-12T18:03:48Z",
+      "side": 1,
+      "message": "There may be other, better ways to do this. See for example `checkAccess` or `enforceCallingPermissionInternal`.",
+      "revId": "e6a078107849401f1e24963716c1146d5aa34e32",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
