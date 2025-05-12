@@ -10272,15 +10272,9 @@ public class MediaProvider extends ContentProvider {
      * </ul>
      */
     private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath) {
-        return shouldBypassFuseRestrictions(forWrite, filePath, /* allowLegacy */ true);
-    }
-    private boolean shouldBypassFuseRestrictions(boolean forWrite, String filePath,
-            boolean allowLegacy) {
         boolean isRequestingLegacyStorage = forWrite ? isCallingPackageLegacyWrite()
                 : isCallingPackageLegacyRead();
-        final boolean shouldAllowLegacy = StrictLocationRedactionHelper.getInstance(getContext())
-                .isSettingEnabled() ? allowLegacy : true;
-        if (allowLegacy && isRequestingLegacyStorage) {
+        if (isRequestingLegacyStorage) {
             return true;
         }
 
@@ -10417,8 +10411,10 @@ public class MediaProvider extends ContentProvider {
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         try {
             if (!isRedactionNeeded()
-                    || shouldBypassFuseRestrictions(/* forWrite */ false, path,
-                            /* allowLegacy */ false)) {
+                    || (!StrictLocationRedactionHelper.getInstance(getContext()).isSettingEnabled()
+                            && shouldBypassFuseRestrictions(/* forWrite */ false, path))) {
+                // No redaction needed, OR strict location redaction is off and we should
+                // bypass FUSE. (We always redact if strict location redaction is on.)
                 return new long[0];
             }
 
