@@ -10827,12 +10827,15 @@ public class MediaProvider extends ContentProvider {
         }
     }
 
-    private Uri insertFileForFuse(@NonNull String path, @NonNull Uri uri, @NonNull String mimeType,
-            boolean useData) {
+    private Uri insertEntryForFuse(@NonNull String path, @NonNull Uri uri,
+            @Nullable String mimeType, boolean useData, boolean isDirectory) {
         ContentValues values = new ContentValues();
         values.put(FileColumns.OWNER_PACKAGE_NAME, getCallingPackageOrSelf());
         values.put(MediaColumns.MIME_TYPE, mimeType);
         values.put(FileColumns.IS_PENDING, 1);
+        if (isDirectory) {
+            values.put(FileColumns.FORMAT, MtpConstants.FORMAT_ASSOCIATION);
+        }
 
         int userIdFromPath = FileUtils.extractUserId(path);
 
@@ -10851,6 +10854,11 @@ public class MediaProvider extends ContentProvider {
             }
         }
         return insert(uri, values, Bundle.EMPTY);
+    }
+
+    @Keep
+    public int insertDirectoryIfNecessaryForFuse(@NonNull String path, int uid) {
+        return insertEntryIfNecessaryForFuse(path, uid, /*isDirectory*/ true);
     }
 
     /**
@@ -10877,33 +10885,46 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public int insertFileIfNecessaryForFuse(@NonNull String path, int uid) {
+        return insertEntryIfNecessaryForFuse(path, uid, /*isDirectory*/ false);
+    }
+
+    private int insertEntryIfNecessaryForFuse(@NonNull String path, int uid, boolean isDirectory) {
+        if (isDirectory) {
+            int status = isDirAccessAllowedForFuse(path, uid, DIRECTORY_ACCESS_FOR_CREATE);
+            if (status != 0) {
+                return status;
+            }
+        }
+
         final LocalCallingIdentity token =
                 clearLocalCallingIdentity(getCachedCallingIdentityForFuse(uid));
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
 
         try {
-            if (isPrivatePackagePathNotAccessibleByCaller(path)) {
-                Log.e(TAG, "Can't create a file in another app's external directory");
-                return OsConstants.ENOENT;
-            }
-
-            if (!path.equals(getAbsoluteSanitizedPath(path))) {
-                Log.e(TAG, "File name contains invalid characters");
-                return OsConstants.EPERM;
-            }
-
-            if (shouldBypassDatabaseAndSetDirtyForFuse(uid, path)) {
-                if (path.endsWith("/.nomedia")) {
-                    File parent = new File(path).getParentFile();
-                    synchronized (mNonHiddenPaths) {
-                        mNonHiddenPaths.keySet().removeIf(
-                                k -> FileUtils.contains(parent, new File(k)));
-                    }
+            if (!isDirectory) {
+                if (isPrivatePackagePathNotAccessibleByCaller(path)) {
+                    Log.e(TAG, "Can't create a file in another app's external directory");
+                    return OsConstants.ENOENT;
                 }
-                return 0;
+
+                if (!path.equals(getAbsoluteSanitizedPath(path))) {
+                    Log.e(TAG, "File name contains invalid characters");
+                    return OsConstants.EPERM;
+                }
+
+                if (shouldBypassDatabaseAndSetDirtyForFuse(uid, path)) {
+                    if (path.endsWith("/.nomedia")) {
+                        File parent = new File(path).getParentFile();
+                        synchronized (mNonHiddenPaths) {
+                            mNonHiddenPaths.keySet().removeIf(
+                                    k -> FileUtils.contains(parent, new File(k)));
+                        }
+                    }
+                    return 0;
+                }
             }
 
-            final String mimeType = MimeUtils.resolveMimeType(new File(path));
+            final String mimeType = isDirectory ? null : MimeUtils.resolveMimeType(new File(path));
 
             if (shouldBypassFuseRestrictions(/* forWrite */ true, path)) {
                 final boolean callerRequestingLegacy = isCallingPackageRequestingLegacy();
@@ -10912,8 +10933,9 @@ public class MediaProvider extends ContentProvider {
                     // IS_PENDING=1. We shouldn't overwrite existing entry as part of FUSE
                     // operation, hence, insert the db row only when it doesn't exist.
                     try {
-                        insertFileForFuse(path, FileUtils.getContentUriForPath(path),
-                                mimeType, /* useData */ callerRequestingLegacy);
+                        insertEntryForFuse(path, FileUtils.getContentUriForPath(path),
+                                mimeType, /* useData */ callerRequestingLegacy,
+                                isDirectory);
                     } catch (Exception ignored) {
                     }
                 } else {
@@ -10935,7 +10957,7 @@ public class MediaProvider extends ContentProvider {
 
             // Legacy apps that made is this far don't have the right storage permission and hence
             // are not allowed to access anything other than their external app directory
-            if (isCallingPackageRequestingLegacy()) {
+            if (!isDirectory && isCallingPackageRequestingLegacy()) {
                 return OsConstants.EPERM;
             }
 
@@ -10945,13 +10967,14 @@ public class MediaProvider extends ContentProvider {
             }
 
             final Uri contentUri = getContentUriForFile(path, mimeType);
-            final Uri item = insertFileForFuse(path, contentUri, mimeType, /* useData */ false);
+            final Uri item = insertEntryForFuse(path, contentUri, mimeType, /* useData */ false,
+                    isDirectory);
             if (item == null) {
                 return OsConstants.EPERM;
             }
             return 0;
         } catch (IllegalArgumentException e) {
-            Log.e(TAG, "insertFileIfNecessary failed", e);
+            Log.e(TAG, "insertEntryIfNecessary failed", e);
             return OsConstants.EPERM;
         } finally {
             restoreLocalCallingIdentity(token);
@@ -10986,6 +11009,11 @@ public class MediaProvider extends ContentProvider {
         }
     }
 
+    @Keep
+    public int deleteDirectoryForFuse(@NonNull String path, int uid) throws IOException {
+        return deleteEntryForFuse(path, uid, /*isDirectory*/ true);
+    }
+
     /**
      * Deletes file with the given {@code path} on behalf of the app with the given {@code uid}.
      * <p>Before deleting, checks if app has permissions to delete this file.
@@ -11005,25 +11033,37 @@ public class MediaProvider extends ContentProvider {
      */
     @Keep
     public int deleteFileForFuse(@NonNull String path, int uid) throws IOException {
+        return deleteEntryForFuse(path, uid, /*isDirectory*/ false);
+    }
+
+    private int deleteEntryForFuse(@NonNull String path, int uid, boolean isDirectory)
+            throws IOException {
         final LocalCallingIdentity localCallingIdentity = getCachedCallingIdentityForFuse(uid);
         final LocalCallingIdentity token = clearLocalCallingIdentity(localCallingIdentity);
         PulledMetrics.logFileAccessViaFuse(getCallingUidOrSelf(), path);
 
         try {
-            if (isPrivatePackagePathNotAccessibleByCaller(path)) {
-                Log.e(TAG, "Can't delete a file in another app's external directory!");
-                return OsConstants.ENOENT;
-            }
+            if (isDirectory) {
+                int status = isDirAccessAllowedForFuse(path, uid, DIRECTORY_ACCESS_FOR_DELETE);
+                if (status != 0) {
+                    return status;
+                }
+            } else {
+                if (isPrivatePackagePathNotAccessibleByCaller(path)) {
+                    Log.e(TAG, "Can't delete a file in another app's external directory!");
+                    return OsConstants.ENOENT;
+                }
 
-            if (shouldBypassDatabaseAndSetDirtyForFuse(uid, path)) {
-                return deleteFileUnchecked(path, localCallingIdentity);
+                if (shouldBypassDatabaseAndSetDirtyForFuse(uid, path)) {
+                    return deleteFileUnchecked(path, localCallingIdentity);
+                }
             }
 
             final boolean shouldBypass = shouldBypassFuseRestrictions(/*forWrite*/ true, path);
 
-            // Legacy apps that made is this far don't have the right storage permission and hence
-            // are not allowed to access anything other than their external app directory
-            if (!shouldBypass && isCallingPackageRequestingLegacy()) {
+            // Legacy apps that made is this far don't have the right storage permission and
+            // hence are not allowed to access anything other than their external app directory
+            if (!isDirectory && !shouldBypass && isCallingPackageRequestingLegacy()) {
                 return OsConstants.EPERM;
             }
 

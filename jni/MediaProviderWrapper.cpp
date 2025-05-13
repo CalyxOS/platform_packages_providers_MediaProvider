@@ -87,10 +87,32 @@ int insertFileInternal(JNIEnv* env, jobject media_provider_object, jmethodID mid
     return res;
 }
 
+int insertDirectoryInternal(JNIEnv* env, jobject media_provider_object,
+                            jmethodID mid_insert_directory, const string& path, uid_t uid) {
+    ScopedLocalRef<jstring> j_path(env, env->NewStringUTF(path.c_str()));
+    int res = env->CallIntMethod(media_provider_object, mid_insert_directory, j_path.get(), uid);
+
+    if (CheckForJniException(env)) {
+        return EFAULT;
+    }
+    return res;
+}
+
 int deleteFileInternal(JNIEnv* env, jobject media_provider_object, jmethodID mid_delete_file,
                        const string& path, uid_t uid) {
     ScopedLocalRef<jstring> j_path(env, env->NewStringUTF(path.c_str()));
     int res = env->CallIntMethod(media_provider_object, mid_delete_file, j_path.get(), uid);
+
+    if (CheckForJniException(env)) {
+        return EFAULT;
+    }
+    return res;
+}
+
+int deleteDirectoryInternal(JNIEnv* env, jobject media_provider_object,
+                            jmethodID mid_delete_directory, const string& path, uid_t uid) {
+    ScopedLocalRef<jstring> j_path(env, env->NewStringUTF(path.c_str()));
+    int res = env->CallIntMethod(media_provider_object, mid_delete_directory, j_path.get(), uid);
 
     if (CheckForJniException(env)) {
         return EFAULT;
@@ -232,7 +254,10 @@ MediaProviderWrapper::MediaProviderWrapper(JNIEnv* env, jobject media_provider) 
 
     // Cache methods - Before calling a method, make sure you cache it here
     mid_insert_file_ = CacheMethod(env, "insertFileIfNecessary", "(Ljava/lang/String;I)I");
+    mid_insert_directory_ =
+            CacheMethod(env, "insertDirectoryIfNecessary", "(Ljava/lang/String;I)I");
     mid_delete_file_ = CacheMethod(env, "deleteFile", "(Ljava/lang/String;I)I");
+    mid_delete_directory_ = CacheMethod(env, "deleteDirectory", "(Ljava/lang/String;I)I");
     mid_unicode_check_enabled_ = CacheMethod(env, "isUnicodeCheckEnabled", "()Z");
     mid_on_file_open_ = CacheMethod(env, "onFileOpen",
                                     "(Ljava/lang/String;Ljava/lang/String;IIIZZZ)Lcom/android/"
@@ -306,6 +331,23 @@ int MediaProviderWrapper::InsertFile(const string& path, uid_t uid) {
     return insertFileInternal(env, media_provider_object_, mid_insert_file_, path, uid);
 }
 
+int MediaProviderWrapper::InsertDirectory(const string& path, uid_t uid) {
+    JNIEnv* env = MaybeAttachCurrentThread();
+
+    int errCode = validatePathIfUnicodeCheckEnabled(env, media_provider_object_,
+                                                    mid_unicode_check_enabled_, path);
+    if (errCode != 0) {
+        LOG(ERROR) << "Invalid chars used in file name for creating new file";
+        return errCode;
+    }
+
+    if (uid == ROOT_UID) {
+        return 0;
+    }
+
+    return insertDirectoryInternal(env, media_provider_object_, mid_insert_directory_, path, uid);
+}
+
 int MediaProviderWrapper::DeleteFile(const string& path, uid_t uid) {
     JNIEnv* env = MaybeAttachCurrentThread();
 
@@ -322,6 +364,24 @@ int MediaProviderWrapper::DeleteFile(const string& path, uid_t uid) {
     }
 
     return deleteFileInternal(env, media_provider_object_, mid_delete_file_, path, uid);
+}
+
+int MediaProviderWrapper::DeleteDirectory(const string& path, uid_t uid) {
+    JNIEnv* env = MaybeAttachCurrentThread();
+
+    int errCode = validatePathIfUnicodeCheckEnabled(env, media_provider_object_,
+                                                    mid_unicode_check_enabled_, path);
+    if (errCode != 0) {
+        LOG(ERROR) << "Invalid chars used in file name while deleting directory";
+        return errCode;
+    }
+
+    if (uid == ROOT_UID) {
+        int res = rmdir(path.c_str());
+        return res;
+    }
+
+    return deleteDirectoryInternal(env, media_provider_object_, mid_delete_directory_, path, uid);
 }
 
 std::unique_ptr<FileOpenResult> MediaProviderWrapper::OnFileOpen(const string& path,

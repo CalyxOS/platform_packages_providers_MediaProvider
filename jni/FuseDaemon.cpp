@@ -1277,7 +1277,7 @@ static void pf_mkdir(fuse_req_t req,
 
     const string child_path = parent_path + "/" + name;
 
-    int status = fuse->mp->IsCreatingDirAllowed(child_path, ctx->uid);
+    int status = fuse->mp->InsertDirectory(child_path, ctx->uid);
     if (status) {
         fuse_reply_err(req, status);
         return;
@@ -1355,14 +1355,9 @@ static void pf_rmdir(fuse_req_t req, fuse_ino_t parent, const char* name) {
 
     const string child_path = parent_path + "/" + name;
 
-    int status = fuse->mp->IsDeletingDirAllowed(child_path, req->ctx.uid);
+    int status = fuse->mp->DeleteDirectory(child_path, req->ctx.uid);
     if (status) {
         fuse_reply_err(req, status);
-        return;
-    }
-
-    if (rmdir(child_path.c_str()) < 0) {
-        fuse_reply_err(req, errno);
         return;
     }
 

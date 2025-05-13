@@ -116,6 +116,16 @@ class MediaProviderWrapper final {
     int InsertFile(const std::string& path, uid_t uid);
 
     /**
+     * Inserts a new directory entry for the given path and UID.
+     *
+     * @param path the path of the directory to be created
+     * @param uid UID of the calling app
+     * @return 0 if the operation succeeded,
+     * or errno error code if operation fails.
+     */
+    int InsertDirectory(const std::string& path, uid_t uid);
+
+    /**
      * Delete the file denoted by the given path on behalf of the given UID.
      *
      * @param path the path of the file to be deleted
@@ -123,6 +133,15 @@ class MediaProviderWrapper final {
      * @return 0 upon success, or errno error code if operation fails.
      */
     int DeleteFile(const std::string& path, uid_t uid);
+
+    /**
+     * Delete the directory denoted by the given path on behalf of the given UID.
+     *
+     * @param path the path of the directory to be deleted
+     * @param uid UID of the calling app
+     * @return 0 upon success, or errno error code if operation fails.
+     */
+    int DeleteDirectory(const std::string& path, uid_t uid);
 
     /**
      * Gets directory entries for given path from MediaProvider database and lower file system
@@ -261,7 +280,9 @@ class MediaProviderWrapper final {
     jobject media_provider_object_;
     /** Cached MediaProvider method IDs **/
     jmethodID mid_insert_file_;
+    jmethodID mid_insert_directory_;
     jmethodID mid_delete_file_;
+    jmethodID mid_delete_directory_;
     jmethodID mid_unicode_check_enabled_;
     jmethodID mid_on_file_open_;
     jmethodID mid_scan_file_;
