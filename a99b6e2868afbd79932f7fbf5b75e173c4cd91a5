@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eda72b0e_c9697fca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-13T16:33:49Z",
+      "side": 1,
+      "message": "This \"works\" but it even breaks downloads in Chromium.\n\nOne thought could be for apps to have their own primary directories with files ending up in e.g. /sdcard/Download/$packageName or /sdcard/Android/media/$packageName/Download. For Downloads, this could still possibly mean that all downloaded files show up in Downloads, but just not in floating in /sdcard/Download. Maybe apps would have virtualized views that correspond to their package names.\n\nThis could be quite an undesirable user experience. I don\u0027t prefer it at all. Maybe there is something else that can be done.",
+      "revId": "a99b6e2868afbd79932f7fbf5b75e173c4cd91a5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
