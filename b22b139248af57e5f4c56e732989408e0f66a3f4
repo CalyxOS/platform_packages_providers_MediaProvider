@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "acf5b649_77994a2f",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 966,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-13T15:52:18Z",
+      "side": 1,
+      "message": "Not (yet) used, and might be moved to another commit. Intention is to stop apps that have not requested any storage permissions from being able to write to otherwise-allowed primary directories like Documents and Download.",
+      "revId": "b22b139248af57e5f4c56e732989408e0f66a3f4",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
