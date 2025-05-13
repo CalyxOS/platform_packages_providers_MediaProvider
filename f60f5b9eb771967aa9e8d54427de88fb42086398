@@ -16,6 +16,24 @@
       "message": "Like this FIXME says, we may need to tell MediaProvider from FuseDaemon\u0027s pf_mkdir that we successfully created a directory so that it can be loaded into the database with proper ownership, etc.",
       "revId": "f60f5b9eb771967aa9e8d54427de88fb42086398",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6ec9e674_e63fb948",
+        "filename": "src/com/android/providers/media/MediaProvider.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 11278,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-13T15:46:29Z",
+      "side": 1,
+      "message": "Handled by https://review.calyxos.org/c/CalyxOS/platform_packages_providers_MediaProvider/+/39092/2\n\nBut still need to check on this more thoroughly and remove the FIXME.",
+      "parentUuid": "5402e468_13970f70",
+      "revId": "f60f5b9eb771967aa9e8d54427de88fb42086398",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
