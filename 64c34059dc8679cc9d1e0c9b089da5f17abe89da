@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7eb2a4e5_e296cafb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-13T15:50:48Z",
+      "side": 1,
+      "message": "Clarify in commit message that this behavior is about directories created or removed via FUSE. MediaProvider does already have an awareness of directories and includes them in its database, although they may need to get scanned first.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 33
+      },
+      "revId": "64c34059dc8679cc9d1e0c9b089da5f17abe89da",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
