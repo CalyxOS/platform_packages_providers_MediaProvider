@@ -16,6 +16,24 @@
       "message": "Not (yet) used, and might be moved to another commit. Intention is to stop apps that have not requested any storage permissions from being able to write to otherwise-allowed primary directories like Documents and Download.",
       "revId": "b22b139248af57e5f4c56e732989408e0f66a3f4",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb460d81_bfa06f1e",
+        "filename": "src/com/android/providers/media/util/FileUtils.java",
+        "patchSetId": 22
+      },
+      "lineNbr": 966,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-13T16:58:27Z",
+      "side": 1,
+      "message": "Done here: https://review.calyxos.org/c/CalyxOS/platform_packages_providers_MediaProvider/+/39093/1\n\n(Not confident in that approach though.)",
+      "parentUuid": "acf5b649_77994a2f",
+      "revId": "b22b139248af57e5f4c56e732989408e0f66a3f4",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
