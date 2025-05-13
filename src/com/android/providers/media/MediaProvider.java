@@ -147,6 +147,7 @@ import static com.android.providers.media.scan.MediaScanner.REASON_DEMAND;
 import static com.android.providers.media.scan.MediaScanner.REASON_IDLE;
 import static com.android.providers.media.util.DatabaseUtils.bindList;
 import static com.android.providers.media.util.FileUtils.DEFAULT_FOLDER_NAMES;
+import static com.android.providers.media.util.FileUtils.ENABLE_FUSE_PREVENT_PERMISSIONLESS_WRITES;
 import static com.android.providers.media.util.FileUtils.ENABLE_FUSE_PROBE_PROTECTION;
 import static com.android.providers.media.util.FileUtils.PATTERN_PENDING_FILEPATH_FOR_SQL;
 import static com.android.providers.media.util.FileUtils.buildPrimaryVolumeFile;
@@ -4623,6 +4624,10 @@ public class MediaProvider extends ContentProvider {
             default:
                 Log.w(TAG, "Unhandled location " + uri + "; assuming generic files");
                 break;
+        }
+
+        if (ENABLE_FUSE_PREVENT_PERMISSIONLESS_WRITES) {
+            allowedPrimary = List.of();
         }
 
         final String resolvedVolumeName = resolveVolumeName(uri);

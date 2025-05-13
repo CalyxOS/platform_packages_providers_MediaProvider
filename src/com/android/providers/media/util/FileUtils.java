@@ -963,6 +963,9 @@ public class FileUtils {
     public static final boolean ENABLE_FUSE_PROBE_PROTECTION =
             SystemProperties.getBoolean("persist.sys.fuse.probe_protection", true);
 
+    public static final boolean ENABLE_FUSE_PREVENT_PERMISSIONLESS_WRITES =
+            SystemProperties.getBoolean("persist.sys.fuse.prevent_permissionless_writes", true);
+
     /**
      * Regex that matches paths in all well-known package-specific directories,
      * and which captures the package name as the first group.
