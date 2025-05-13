@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "db7f2565_7c8ba4e4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 23
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-13T16:57:06Z",
+      "side": 1,
+      "message": "I think the only reason we don\u0027t need the [previous](https://review.calyxos.org/c/CalyxOS/platform_packages_providers_MediaProvider/+/35646) [commits](https://review.calyxos.org/c/CalyxOS/platform_packages_providers_MediaProvider/+/35666) for directories is the use of [readdir_plus](https://cs.android.com/android/platform/superproject/+/android15-qpr2-release:packages/providers/MediaProvider/jni/FuseDaemon.cpp;l\u003d1991-2007).\n\nSo, **make sure readdir_plus is always in use, or have an understanding of when it is/isn\u0027t used**.",
+      "revId": "93054e23adba4bcd1dd67249e5296dca4012454e",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
