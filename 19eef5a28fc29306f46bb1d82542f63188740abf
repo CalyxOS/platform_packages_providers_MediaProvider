@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f774c0ff_dd4eab38",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-14T14:30:22Z",
+      "side": 1,
+      "message": "Test this using all the same test steps from the issue or elsewhere, to be sure there are no regressions in strict location redaction\u0027s desired effects.",
+      "revId": "19eef5a28fc29306f46bb1d82542f63188740abf",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
