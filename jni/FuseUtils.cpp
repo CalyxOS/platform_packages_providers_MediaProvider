@@ -93,7 +93,7 @@ std::string removeDefaultIgnorableCodepoints(const std::string_view& str) {
              c >= 0;
              c = utext_next32(ut)) {
             if (!u_hasBinaryProperty(c, UProperty::UCHAR_DEFAULT_IGNORABLE_CODE_POINT)) {
-                char utf8[4];
+                char utf8[U8_MAX_LENGTH];
                 int size = 0;
                 U8_APPEND_UNSAFE(utf8, size, c);
                 out.append(utf8, size);
