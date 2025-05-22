@@ -16,6 +16,23 @@
       "message": "This doesn\u0027t make an actual difference other than syncing both changes:\n\nexternal/icu/icu4c/source/common/unicode/utf8.h\n215:#define U8_MAX_LENGTH 4",
       "revId": "bd93290236e18fc2743062932b2317def271d395",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "07a68399_56472c54",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2025-05-22T17:06:10Z",
+      "side": 1,
+      "message": "Retroactive approval ;-)",
+      "revId": "bd93290236e18fc2743062932b2317def271d395",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
