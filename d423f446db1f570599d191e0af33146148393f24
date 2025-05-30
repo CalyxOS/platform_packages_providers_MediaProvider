@@ -16,6 +16,23 @@
       "message": "Trivial conflict resolved",
       "revId": "d423f446db1f570599d191e0af33146148393f24",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad95fce1_ee5afdb3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2025-05-30T18:37:28Z",
+      "side": 1,
+      "message": "Missing the fixup but it\u0027s just cosmetic",
+      "revId": "d423f446db1f570599d191e0af33146148393f24",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
