@@ -30,12 +30,13 @@ import static com.android.providers.media.util.PermissionUtils.checkPermissionMa
 import static com.android.providers.media.util.PermissionUtils.checkPermissionManager;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionQueryAllPackages;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadAudio;
+import static com.android.providers.media.util.PermissionUtils.checkPermissionReadForLegacyStorage;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadImages;
-import static com.android.providers.media.util.PermissionUtils.checkPermissionReadStorage;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadVideo;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionReadVisualUserSelected;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionSelf;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionShell;
+import static com.android.providers.media.util.PermissionUtils.checkPermissionUpdateOemMetadata;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionWriteAudio;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionWriteImages;
 import static com.android.providers.media.util.PermissionUtils.checkPermissionWriteStorage;
@@ -355,6 +356,7 @@ public class LocalCallingIdentity {
     public static final int PERMISSION_QUERY_ALL_PACKAGES = 1 << 28;
     public static final int PERMISSION_ACCESS_MEDIA_OWNER_PACKAGE_NAME = 1 << 29;
     public static final int PERMISSION_ACCESS_OEM_METADATA = 1 << 30;
+    public static final int PERMISSION_UPDATE_OEM_METADATA = 1 << 31;
 
     public static final int PERMISSION_MANAGE_MEDIA = 1 << 31;
 
@@ -362,8 +364,16 @@ public class LocalCallingIdentity {
     private volatile int hasPermissionResolved;
 
     public boolean hasPermission(int permission) {
+        return hasPermission(permission, /* forDataDelivery */ true);
+    }
+
+    /**
+     * Checks the package for the input permission and if the param
+     * forDataDelivery is true then makes a note of it.
+     */
+    public boolean hasPermission(int permission, boolean forDataDelivery) {
         if ((hasPermissionResolved & permission) == 0) {
-            if (hasPermissionInternal(permission)) {
+            if (hasPermissionInternal(permission, forDataDelivery)) {
                 hasPermission |= permission;
             }
             hasPermissionResolved |= permission;
@@ -371,7 +381,7 @@ public class LocalCallingIdentity {
         return (hasPermission & permission) != 0;
     }
 
-    private boolean hasPermissionInternal(int permission) {
+    private boolean hasPermissionInternal(int permission, boolean forDataDelivery) {
         boolean targetSdkIsAtLeastT = getTargetSdkVersion() > Build.VERSION_CODES.S_V2;
         if (StrictLocationRedactionHelper.getInstance(context).isSettingEnabled()) {
             // We lie about target SDK because lower SDK should not be rewarded with access
@@ -410,25 +420,28 @@ public class LocalCallingIdentity {
 
             case PERMISSION_READ_AUDIO:
                 return checkPermissionReadAudio(
-                        context, pid, uid, getPackageName(), attributionTag, targetSdkIsAtLeastT);
+                        context, pid, uid, getPackageName(), attributionTag, targetSdkIsAtLeastT,
+                        forDataDelivery);
             case PERMISSION_READ_VIDEO:
                 return checkPermissionReadVideo(
-                        context, pid, uid, getPackageName(), attributionTag, targetSdkIsAtLeastT);
+                        context, pid, uid, getPackageName(), attributionTag, targetSdkIsAtLeastT,
+                        forDataDelivery);
             case PERMISSION_READ_IMAGES:
                 return checkPermissionReadImages(
-                        context, pid, uid, getPackageName(), attributionTag, targetSdkIsAtLeastT);
+                        context, pid, uid, getPackageName(), attributionTag, targetSdkIsAtLeastT,
+                        forDataDelivery);
             case PERMISSION_WRITE_AUDIO:
                 return checkPermissionWriteAudio(
-                        context, pid, uid, getPackageName(), attributionTag);
+                        context, pid, uid, getPackageName(), attributionTag, forDataDelivery);
             case PERMISSION_WRITE_VIDEO:
                 return checkPermissionWriteVideo(
-                        context, pid, uid, getPackageName(), attributionTag);
+                        context, pid, uid, getPackageName(), attributionTag, forDataDelivery);
             case PERMISSION_WRITE_IMAGES:
                 return checkPermissionWriteImages(
-                        context, pid, uid, getPackageName(), attributionTag);
+                        context, pid, uid, getPackageName(), attributionTag, forDataDelivery);
             case PERMISSION_IS_SYSTEM_GALLERY:
                 return checkWriteImagesOrVideoAppOps(
-                        context, uid, getPackageName(), attributionTag);
+                        context, uid, getPackageName(), attributionTag, forDataDelivery);
             case PERMISSION_INSTALL_PACKAGES:
                 return checkPermissionInstallPackages(
                         context, pid, uid, getPackageName(), attributionTag);
@@ -440,7 +453,7 @@ public class LocalCallingIdentity {
                         context, pid, uid, getPackageName(), attributionTag);
             case PERMISSION_READ_MEDIA_VISUAL_USER_SELECTED:
                 return checkPermissionReadVisualUserSelected(context, pid, uid, getPackageName(),
-                        attributionTag, targetSdkIsAtLeastT);
+                        attributionTag, targetSdkIsAtLeastT, forDataDelivery);
             case PERMISSION_QUERY_ALL_PACKAGES:
                 return checkPermissionQueryAllPackages(
                         context, pid, uid, getPackageName(), attributionTag);
@@ -449,6 +462,9 @@ public class LocalCallingIdentity {
                         context, pid, uid, getPackageName(), attributionTag);
             case PERMISSION_ACCESS_OEM_METADATA:
                 return checkPermissionAccessOemMetadata(context, pid, uid, getPackageName(),
+                        attributionTag);
+            case PERMISSION_UPDATE_OEM_METADATA:
+                return checkPermissionUpdateOemMetadata(context, pid, uid, getPackageName(),
                         attributionTag);
             case PERMISSION_MANAGE_MEDIA:
                 return checkPermissionManageMedia(context, pid, uid, getPackageName(),
@@ -476,8 +492,7 @@ public class LocalCallingIdentity {
         // To address b/338519249, we will check for sdk version V+
         boolean targetSdkIsAtLeastV =
                 getTargetSdkVersion() >= Build.VERSION_CODES.VANILLA_ICE_CREAM;
-        return checkIsLegacyStorageGranted(context, uid, getPackageName(), attributionTag,
-                targetSdkIsAtLeastV);
+        return checkIsLegacyStorageGranted(context, uid, getPackageName(), targetSdkIsAtLeastV);
     }
 
     private volatile boolean shouldBypass;
@@ -573,8 +588,14 @@ public class LocalCallingIdentity {
     }
 
     private boolean isLegacyReadInternal() {
-        return hasPermission(PERMISSION_IS_LEGACY_GRANTED)
-                && checkPermissionReadStorage(context, pid, uid, getPackageName(), attributionTag);
+        boolean isLegacyStorageGranted = hasPermission(PERMISSION_IS_LEGACY_GRANTED);
+        if (!isLegacyStorageGranted) {
+            return false;
+        }
+
+        boolean isTargetSdkAtleastT = getTargetSdkVersion() >= Build.VERSION_CODES.TIRAMISU;
+        return checkPermissionReadForLegacyStorage(context, pid, uid, getPackageName(),
+                attributionTag, isTargetSdkAtleastT);
     }
 
     /** System internals or callers holding permission have no redaction */
@@ -696,37 +717,39 @@ public class LocalCallingIdentity {
     /**
      * Returns {@code true} if this package has Audio read/write permissions.
      */
-    public boolean checkCallingPermissionAudio(boolean forWrite) {
+    public boolean checkCallingPermissionAudio(boolean forWrite, boolean forDataDelivery) {
         if (forWrite) {
-            return hasPermission(PERMISSION_WRITE_AUDIO);
+            return hasPermission(PERMISSION_WRITE_AUDIO, forDataDelivery);
         } else {
             // write permission should be enough for reading as well
-            return hasPermission(PERMISSION_READ_AUDIO)
-                    || hasPermission(PERMISSION_WRITE_AUDIO);
+            return hasPermission(PERMISSION_READ_AUDIO, forDataDelivery)
+                    || hasPermission(PERMISSION_WRITE_AUDIO, forDataDelivery);
         }
     }
 
     /**
      * Returns {@code true} if this package has Video read/write permissions.
      */
-    public boolean checkCallingPermissionVideo(boolean forWrite) {
+    public boolean checkCallingPermissionVideo(boolean forWrite, boolean forDataDelivery) {
         if (forWrite) {
-            return hasPermission(PERMISSION_WRITE_VIDEO);
+            return hasPermission(PERMISSION_WRITE_VIDEO, forDataDelivery);
         } else {
             // write permission should be enough for reading as well
-            return hasPermission(PERMISSION_READ_VIDEO) || hasPermission(PERMISSION_WRITE_VIDEO);
+            return hasPermission(PERMISSION_READ_VIDEO, forDataDelivery) || hasPermission(
+                    PERMISSION_WRITE_VIDEO, forDataDelivery);
         }
     }
 
     /**
      * Returns {@code true} if this package has Image read/write permissions.
      */
-    public boolean checkCallingPermissionImages(boolean forWrite) {
+    public boolean checkCallingPermissionImages(boolean forWrite, boolean forDataDelivery) {
         if (forWrite) {
-            return hasPermission(PERMISSION_WRITE_IMAGES);
+            return hasPermission(PERMISSION_WRITE_IMAGES, forDataDelivery);
         } else {
             // write permission should be enough for reading as well
-            return hasPermission(PERMISSION_READ_IMAGES) || hasPermission(PERMISSION_WRITE_IMAGES);
+            return hasPermission(PERMISSION_READ_IMAGES, forDataDelivery) || hasPermission(
+                    PERMISSION_WRITE_IMAGES, forDataDelivery);
         }
     }
 
@@ -748,6 +771,13 @@ public class LocalCallingIdentity {
     }
 
     /**
+     * Returns {@code true} if this package has permission to update oem_metadata of any media.
+     */
+    public boolean checkCallingPermissionToUpdateOemMetadata() {
+        return hasPermission(PERMISSION_UPDATE_OEM_METADATA);
+    }
+
+    /**
      * Returns {@code true} if this package is a legacy app and has read permission
      */
     public boolean isCallingPackageLegacyRead() {
@@ -764,11 +794,12 @@ public class LocalCallingIdentity {
     /**
      * Return {@code true} if this package has user selected access on images/videos.
      */
-    public boolean checkCallingPermissionUserSelected() {
+    public boolean checkCallingPermissionUserSelected(boolean forDataDelivery) {
         // For user select mode READ_MEDIA_VISUAL_USER_SELECTED == true &&
         // READ_MEDIA_IMAGES == false && READ_MEDIA_VIDEO == false
-        return hasPermission(PERMISSION_READ_MEDIA_VISUAL_USER_SELECTED)
-                && !hasPermission(PERMISSION_READ_IMAGES) && !hasPermission(PERMISSION_READ_VIDEO);
+        return hasPermission(PERMISSION_READ_MEDIA_VISUAL_USER_SELECTED, forDataDelivery)
+                && !hasPermission(PERMISSION_READ_IMAGES, forDataDelivery) && !hasPermission(
+                PERMISSION_READ_VIDEO, forDataDelivery);
     }
 
     protected void dump(PrintWriter writer) {
