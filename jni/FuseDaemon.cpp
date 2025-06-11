@@ -289,6 +289,9 @@ struct fuse {
     }
 
     inline string GetTransformsDir() { return GetEffectiveRootPath() + "/.transforms"; }
+    inline string GetPickerTranscodedDir() {
+        return GetEffectiveRootPath() + "/.picker_transcoded";
+    }
 
     // Note that these two (FromInode / ToInode) conversion wrappers are required
     // because fuse_lowlevel_ops documents that the root inode is always one
@@ -543,6 +546,14 @@ static inline bool is_transforms_dir_path(const string& path, struct fuse* fuse)
     return android::base::StartsWithIgnoreCase(path, fuse->GetTransformsDir());
 }
 
+static inline bool is_picker_transcoded_dir_path(const string& path, struct fuse* fuse) {
+    return android::base::StartsWithIgnoreCase(path, fuse->GetPickerTranscodedDir());
+}
+
+static inline bool is_hidden_dir_path(const string& path, struct fuse* fuse) {
+    return is_transforms_dir_path(path, fuse) || is_picker_transcoded_dir_path(path, fuse);
+}
+
 /*
  * Check if the provided path is an Android/data or Android/obb folder under /storage/ that might
  * be the subject of confusion in applying restrictions due to the presence of default ignorable
@@ -586,7 +597,7 @@ static std::unique_ptr<mediaprovider::fuse::FileLookupResult> validate_node_path
         return nullptr;
     }
 
-    if (is_transforms_dir_path(path, fuse)) {
+    if (is_hidden_dir_path(path, fuse)) {
         if (op == FuseOp::lookup) {
             // Lookups are only allowed under .transforms/synthetic dir
             if (!(android::base::EqualsIgnoreCase(path, fuse->GetTransformsDir()) ||
@@ -598,6 +609,8 @@ static std::unique_ptr<mediaprovider::fuse::FileLookupResult> validate_node_path
         } else {
             // user-code is only allowed to make lookups under .transforms dir, and that too only
             // under .transforms/synthetic dir
+            // Additionally No operations are allowed on .picker_transcoded directory
+            // as it should be only used by MediaProvider
             *error_code = ENOENT;
             return nullptr;
         }
@@ -747,6 +760,28 @@ namespace fuse {
  *
  */
 
+bool IsUpstreamPassthroughSupported() {
+    // Upstream passthrough requires some modifications to work. If those are present,
+    // /sys/fs/fuse/fuse_passthrough will read 'supported\n'
+    // - see fs/fuse/inode.c in the kernel source
+
+    string contents;
+    const char* filename = "/sys/fs/fuse/features/fuse_passthrough";
+    if (!android::base::ReadFileToString(filename, &contents)) {
+        LOG(INFO) << "fuse-passthrough is disabled because " << filename << " cannot be read";
+        return false;
+    }
+
+    if (contents == "supported\n") {
+        LOG(INFO) << "fuse-passthrough is enabled because " << filename << " reads 'supported'";
+        return true;
+    } else {
+        LOG(INFO) << "fuse-passthrough is disabled because " << filename
+                  << " does not read 'supported'";
+        return false;
+    }
+}
+
 static void pf_init(void* userdata, struct fuse_conn_info* conn) {
     struct fuse* fuse = reinterpret_cast<struct fuse*>(userdata);
 
@@ -786,7 +821,8 @@ static void pf_init(void* userdata, struct fuse_conn_info* conn) {
             //   b. Files requiring redaction are still faster than no-passthrough devices that use
             //      direct_io
             disable_splice_write = true;
-        } else if (conn->capable & FUSE_CAP_PASSTHROUGH_UPSTREAM) {
+        } else if ((conn->capable & FUSE_CAP_PASSTHROUGH_UPSTREAM) &&
+                   IsUpstreamPassthroughSupported()) {
             mask |= FUSE_CAP_PASSTHROUGH_UPSTREAM;
             disable_splice_write = true;
             fuse->upstream_passthrough = true;
@@ -1344,9 +1380,9 @@ static void pf_rmdir(fuse_req_t req, fuse_ino_t parent, const char* name) {
         return;
     }
 
-    if (is_transforms_dir_path(parent_path, fuse)) {
-        // .transforms is a special daemon controlled dir so apps shouldn't be able to see it via
-        // readdir, and any dir operations attempted on it should fail
+    if (is_hidden_dir_path(parent_path, fuse)) {
+        // .transforms and .picker_transcoded are special daemon controlled dirs so apps shouldn't
+        // be able to see it via readdir, and any dir operations attempted on it should fail
         fuse_reply_err(req, ENOENT);
         return;
     }
@@ -1400,9 +1436,9 @@ static int do_rename(fuse_req_t req, fuse_ino_t parent, const char* name, fuse_i
         return ENOENT;
     }
 
-    if (is_transforms_dir_path(old_parent_path, fuse)) {
-        // .transforms is a special daemon controlled dir so apps shouldn't be able to see it via
-        // readdir, and any dir operations attempted on it should fail
+    if (is_hidden_dir_path(old_parent_path, fuse)) {
+        // .transforms and .picker_transcoded are special daemon controlled dirs so apps shouldn't
+        // be able to see it via readdir, and any dir operations attempted on it should fail
         return ENOENT;
     }
 
@@ -1485,7 +1521,7 @@ static handle* create_handle_for_node(struct fuse* fuse, const string& path, int
     }
 
     if (fuse->passthrough && allow_passthrough) {
-        *keep_cache = transforms_complete && !fuse->upstream_passthrough;
+        *keep_cache = transforms_complete;
         // We only enabled passthrough iff these 2 conditions hold
         // 1. Redaction is not needed
         // 2. Node transforms are completed, e.g transcoding.
@@ -2649,6 +2685,7 @@ std::unique_ptr<FdAccessResult> FuseDaemon::CheckFdAccess(int fd, uid_t uid) con
         return std::make_unique<FdAccessResult>(string(), false);
     }
 
+    std::lock_guard<std::recursive_mutex> guard(fuse->lock);
     const node* node = node::LookupInode(fuse->root, ino);
     if (!node) {
         PLOG(DEBUG) << "CheckFdAccess no node found with given ino";
