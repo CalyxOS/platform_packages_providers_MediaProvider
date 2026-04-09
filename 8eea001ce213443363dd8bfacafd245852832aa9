@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bdfb30a6_2f2dd4fa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2026-04-09T19:05:12Z",
+      "side": 1,
+      "message": "When typing `ls /sdcard/Android/data$\u0027\\u200b\u0027` I am getting:\n\n`ls: cannot access \u0027/sdcard/Android/data\u0027: Invalid argument`\n\nNot the expected error which is `Permission denied`, but still no listing, so I guess this works?",
+      "revId": "8eea001ce213443363dd8bfacafd245852832aa9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
