@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "000276e4_e883be9b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2026-04-09T18:54:35Z",
+      "side": 1,
+      "message": "I took a photo with GPS location and confirmed in Glimpse that it has a GPS location. Then I shared the photo with Phone Saver 5.2.1 (which targets an old SDK) and opened the shared photo (that got saved by phone saver) in Glimpse. This time there was no location info in the same photo, so it appears stripped.",
+      "revId": "36a1142bfb4bebb46bd1a6e675b8e8a04de43f19",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
