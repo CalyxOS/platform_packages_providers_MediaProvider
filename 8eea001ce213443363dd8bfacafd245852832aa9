@@ -16,6 +16,24 @@
       "message": "When typing `ls /sdcard/Android/data$\u0027\\u200b\u0027` I am getting:\n\n`ls: cannot access \u0027/sdcard/Android/data\u0027: Invalid argument`\n\nNot the expected error which is `Permission denied`, but still no listing, so I guess this works?",
       "revId": "8eea001ce213443363dd8bfacafd245852832aa9",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40033d72_7541a56a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2026-04-09T19:06:50Z",
+      "side": 1,
+      "message": "In the log, I did get:\n\n`W FuseDaemon: Failing validate_node_path due to default ignorable codepoints: /storage/emulated/0/Android/data​`\n\nSo that is expected and seems like our fix did trigger.",
+      "parentUuid": "bdfb30a6_2f2dd4fa",
+      "revId": "8eea001ce213443363dd8bfacafd245852832aa9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
