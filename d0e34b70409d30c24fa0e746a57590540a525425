@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e8c4291b_2d6b732d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000109
+      },
+      "writtenOn": "2026-04-09T21:25:36Z",
+      "side": 1,
+      "message": "The test in the commit seemingly worked, but then with the feature off, it also \"worked\". So non-conclusive. Maybe it\u0027s a different path.\n\nMore over I went and tried Fossify Gallery, and gave it just access but no media / all files access, and regardless, it was able to see the GPS coordinates.",
+      "revId": "d0e34b70409d30c24fa0e746a57590540a525425",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
