@@ -16,6 +16,24 @@
       "message": "The test in the commit seemingly worked, but then with the feature off, it also \"worked\". So non-conclusive. Maybe it\u0027s a different path.\n\nMore over I went and tried Fossify Gallery, and gave it just access but no media / all files access, and regardless, it was able to see the GPS coordinates.",
       "revId": "d0e34b70409d30c24fa0e746a57590540a525425",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4b2506f9_dd3709d8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-20T11:56:56Z",
+      "side": 1,
+      "message": "These commits have been manually included on every 16 QPR2 build so far, so given android16-qpr2 branch is being retired, I will merge them here. Discussion and evaluation can continue on android 17",
+      "parentUuid": "e8c4291b_2d6b732d",
+      "revId": "d0e34b70409d30c24fa0e746a57590540a525425",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
